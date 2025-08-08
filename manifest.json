@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Summarizer",
+  "version": "0.1.0",
+  "description": "Summarize the current page or video using Google Gemini; includes the page URL in the prompt.",
+  "action": {
+    "default_title": "Summarize with Gemini",
+    "default_popup": "src/popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "options_page": "src/options.html",
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["src/contentScript.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

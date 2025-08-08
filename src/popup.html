@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gemini Summarizer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Gemini Summarizer</h1>
+        <a id="openOptions" href="#">Options</a>
+      </header>
+      <div class="row">
+        <label for="mode">Summarize:</label>
+        <select id="mode">
+          <option value="auto" selected>Auto</option>
+          <option value="page">Page</option>
+          <option value="video">Video</option>
+        </select>
+      </div>
+      <div class="row small" id="url"></div>
+      <button id="summarizeBtn">Summarize this page</button>
+      <div id="status" class="muted"></div>
+      <pre id="output"></pre>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
