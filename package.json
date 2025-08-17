@@ -1,0 +1,17 @@
+{
+  "name": "justthegist",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "JustTheGist: summarize the current page/video with LLMs.",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.4.5"
+  }
+}

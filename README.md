@@ -1,4 +1,4 @@
-# Gemini Summarizer (Chrome/Edge MV3)
+# JustTheGist (Chrome/Edge MV3)
 
 A minimal Chrome/Edge extension that summarizes the current page (and any detected video metadata and cues) with Google Gemini. The page URL is always included in the prompt.
 
@@ -13,7 +13,7 @@ A minimal Chrome/Edge extension that summarizes the current page (and any detect
 
 1) Get a Google Gemini API key from Google AI Studio: https://aistudio.google.com/app/apikey
 
-2) In the extension Options page, paste your API key and pick a model (default: gemini-1.5-flash).
+2) In the extension Options page, paste your API key and pick a model (default: gemini-2.5-flash).
 
 3) Load the extension in Chrome/Edge:
    - Navigate to chrome://extensions (or edge://extensions)
@@ -40,11 +40,11 @@ A minimal Chrome/Edge extension that summarizes the current page (and any detect
 ## Files
 
 - manifest.json — MV3 config
-- src/background.js — handles context menu, messages, and calls Gemini
-- src/contentScript.js — extracts page text and video metadata
-- src/gemini.js — minimal Gemini API client (fetch)
-- src/popup.html/js/css — popup UI
-- src/options.html/js — options page for API key and model
+- src/background.ts — handles context menu, messages, and calls Gemini
+- src/contentScript.ts — extracts page text and video metadata
+- src/gemini.ts — minimal Gemini API client (fetch)
+- src/popup.html/ts/css — popup UI
+- src/options.html/ts — options page for API key and model
 
 ## License
 

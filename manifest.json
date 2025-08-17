@@ -1,11 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Gemini Summarizer",
+  "name": "JustTheGist",
   "version": "0.1.0",
-  "description": "Summarize the current page or video using Google Gemini; includes the page URL in the prompt.",
+  "description": "JustTheGist: Summarize the current page or video with Google Gemini, including the page URL.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "action": {
-    "default_title": "Summarize with Gemini",
-    "default_popup": "src/popup.html"
+    "default_title": "Summarize with JustTheGist",
+    "default_popup": "dist/popup.html",
+    "default_icon": {
+      "16": "icons/action-16.png",
+      "24": "icons/action-24.png",
+      "32": "icons/action-32.png"
+    }
   },
   "permissions": [
     "activeTab",
@@ -18,15 +29,18 @@
     "http://*/*",
     "https://generativelanguage.googleapis.com/*"
   ],
-  "options_page": "src/options.html",
+  "options_page": "dist/options.html",
   "background": {
-    "service_worker": "src/background.js",
+    "service_worker": "dist/background.js",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["src/contentScript.js"],
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "js": ["dist/contentScript.js"],
       "run_at": "document_idle"
     }
   ]
