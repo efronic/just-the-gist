@@ -1,6 +1,8 @@
 /// <reference types="chrome" />
-import type { ExtractedCue, ExtractedVideo, ExtractedPage } from './types/extract';
-function extractMainText(): string {
+import type { ExtractedCue, ExtractedVideo, ExtractedPage, VideoPlatform } from './types/extract';
+import { VIDEO_PLATFORM } from './types/extract';
+
+const extractMainText = (): string => {
   try {
     // Prefer <article>
     const article = document.querySelector('article');
@@ -19,24 +21,24 @@ function extractMainText(): string {
   } catch (_e) {
     return document.title || '';
   }
-}
+};
 
 // Types moved to src/types/extract.ts
 
-function detectPlatformFromUrl(u: string | undefined): 'youtube' | 'vimeo' | 'other' {
-  if (!u) return 'other';
+const detectPlatformFromUrl = (u: string | undefined): VideoPlatform => {
+  if (!u) return VIDEO_PLATFORM.other;
   try {
     const url = new URL(u);
     const h = url.hostname || '';
-    if (/(^|\.)youtube\.com$/.test(h) || /(^|\.)youtu\.be$/.test(h)) return 'youtube';
-    if (/(^|\.)vimeo\.com$/.test(h)) return 'vimeo';
+    if (/(^|\.)youtube\.com$/.test(h) || /(^|\.)youtu\.be$/.test(h)) return VIDEO_PLATFORM.youtube;
+    if (/(^|\.)vimeo\.com$/.test(h)) return VIDEO_PLATFORM.vimeo;
   } catch (_e) {
     // ignore
   }
-  return 'other';
-}
+  return VIDEO_PLATFORM.other;
+};
 
-function extractVideo(): ExtractedVideo {
+const extractVideo = (): ExtractedVideo => {
   try {
     const vid = document.querySelector('video') as HTMLVideoElement | null;
     if (!vid) return { hasVideo: false };
@@ -80,7 +82,7 @@ function extractVideo(): ExtractedVideo {
     pageUrl = canonicalHref || ogUrl;
 
     // Heuristics for YouTube and others if canonical/og:url is missing or not a watch URL
-    const href = location.href;
+    const href = location.href as string;
     if (!pageUrl) {
       if (/youtube\.com\/watch/.test(href) || /youtu\.be\//.test(href)) {
         pageUrl = href;
@@ -100,7 +102,7 @@ function extractVideo(): ExtractedVideo {
   } catch (_e) {
     return { hasVideo: false };
   }
-}
+};
 
 chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
   if (msg?.type === 'EXTRACT_PAGE') {

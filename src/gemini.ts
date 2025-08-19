@@ -1,4 +1,4 @@
-export async function callGemini({ apiKey, model = 'gemini-2.5-flash', input }: { apiKey: string; model?: string; input: string; }): Promise<string> {
+export const callGemini = async ({ apiKey, model = 'gemini-2.5-flash', input }: { apiKey: string; model?: string; input: string; }): Promise<string> => {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const body = {
@@ -33,4 +33,4 @@ export async function callGemini({ apiKey, model = 'gemini-2.5-flash', input }: 
     '';
   if (!text) throw new Error('Empty response from Gemini.');
   return text;
-}
+};

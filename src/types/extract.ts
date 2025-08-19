@@ -1,5 +1,13 @@
 // Centralized types for page and video extraction
 
+export type VideoPlatform = 'youtube' | 'vimeo' | 'other';
+
+export const VIDEO_PLATFORM = {
+    youtube: 'youtube',
+    vimeo: 'vimeo',
+    other: 'other'
+} as const;
+
 export type ExtractedCue = {
     text: string;
     startTime: number;
@@ -20,7 +28,7 @@ export type ExtractedVideo = {
     // Canonical video page URL if known (e.g., a YouTube watch URL)
     pageUrl?: string;
     // Detected video platform (used for platform-aware logic)
-    sourcePlatform?: 'youtube' | 'vimeo' | 'other';
+    sourcePlatform?: VideoPlatform;
 };
 
 export type ExtractedPage = {
@@ -29,3 +37,11 @@ export type ExtractedPage = {
     mainText: string;
     video: ExtractedVideo;
 };
+
+// Summarization modes shared across UI and background
+export type SummarizeMode = 'auto' | 'page' | 'video';
+export const SUMMARIZE_MODE = {
+    auto: 'auto',
+    page: 'page',
+    video: 'video'
+} as const;

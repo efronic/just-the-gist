@@ -3,27 +3,78 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>JustTheGist</title>
-    <link rel="stylesheet" href="popup.css" />
+    <title>JustTheGist</title>
+    <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body>
-    <div class="container">
-      <header>
-  <h1>JustTheGist</h1>
-        <a id="openOptions" href="#">Options</a>
+    <div class="w-[360px] p-3 font-sans">
+      <header class="flex items-baseline justify-between mb-3">
+        <h1 class="text-base m-0">JustTheGist</h1>
+        <a
+          id="openOptions"
+          href="#"
+          class="text-sm text-blue-600 hover:underline"
+          >Options</a
+        >
       </header>
-      <div class="row">
-        <label for="mode">Summarize:</label>
-        <select id="mode">
+
+      <div id="apiSection" class="space-y-2" style="display: none">
+        <label for="apiKey" class="block font-semibold mt-2"
+          >Google Gemini API key</label
+        >
+        <input
+          id="apiKey"
+          type="password"
+          placeholder="AIza..."
+          class="w-full p-2 text-sm border border-gray-300 rounded"
+        />
+        <label for="apiModel" class="block font-semibold mt-2">Model</label>
+        <select
+          id="apiModel"
+          class="w-full p-2 text-sm border border-gray-300 rounded"
+        >
+          <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+          <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+          <option value="gemini-1.0-pro">gemini-1.0-pro</option>
+        </select>
+        <div class="flex items-center gap-2 mt-1">
+          <button
+            id="saveApi"
+            class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Save API settings
+          </button>
+          <span id="apiStatus" class="text-xs text-gray-600"></span>
+        </div>
+        <div class="text-xs text-gray-600 break-all">
+          You can also manage this in
+          <a href="#" id="openOptions2" class="text-blue-600 hover:underline"
+            >Options</a
+          >.
+        </div>
+      </div>
+
+      <div class="mt-2">
+        <label for="mode" class="mr-2">Summarize:</label>
+        <select id="mode" class="p-1.5 text-sm border border-gray-300 rounded">
           <option value="auto" selected>Auto</option>
           <option value="page">Page</option>
           <option value="video">Video</option>
         </select>
       </div>
-      <div class="row small" id="url"></div>
-      <button id="summarizeBtn">Summarize this page</button>
-      <div id="status" class="muted"></div>
-      <pre id="output"></pre>
+      <div class="text-xs text-gray-600 break-all mt-2" id="url"></div>
+      <button
+        id="summarizeBtn"
+        class="mt-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+      >
+        Summarize this page
+      </button>
+      <div id="status" class="text-xs text-gray-600 mt-2"></div>
+      <pre
+        id="output"
+        class="mt-2 max-h-80 overflow-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded"
+      ></pre>
     </div>
     <script type="module" src="popup.js"></script>
   </body>

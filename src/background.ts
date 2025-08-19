@@ -1,6 +1,7 @@
 /// <reference types="chrome" />
 import { callGemini } from './gemini';
-import type { ExtractedCue, ExtractedVideo, ExtractedPage } from './types/extract';
+import type { ExtractedCue, ExtractedVideo, ExtractedPage, SummarizeMode } from './types/extract';
+import { SUMMARIZE_MODE } from './types/extract';
 
 // Create context menu to summarize page
 chrome.runtime.onInstalled.addListener(() => {
@@ -14,12 +15,12 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== 'justthegist') return;
   if (!tab || !tab.id) return;
-  await handleSummarizeRequest({ tabId: tab.id, mode: 'auto' });
+  await handleSummarizeRequest({ tabId: tab.id, mode: SUMMARIZE_MODE.auto });
 });
 
 chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
   if (msg?.type === 'SUMMARIZE_TAB') {
-    handleSummarizeRequest({ tabId: msg.tabId as number, mode: (msg.mode || 'auto') as 'auto' | 'page' | 'video' })
+    handleSummarizeRequest({ tabId: msg.tabId as number, mode: (msg.mode || SUMMARIZE_MODE.auto) as SummarizeMode })
       .then(result => sendResponse({ ok: true, result }))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
@@ -31,7 +32,7 @@ chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageS
 
 // Types moved to src/types/extract.ts
 
-async function handleSummarizeRequest({ tabId, mode }: { tabId: number; mode: 'auto' | 'page' | 'video'; }) {
+const handleSummarizeRequest = async ({ tabId, mode }: { tabId: number; mode: SummarizeMode; }) => {
   // 1) Ask content script for page extraction
   const extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
 
@@ -55,9 +56,9 @@ async function handleSummarizeRequest({ tabId, mode }: { tabId: number; mode: 'a
   });
 
   return { text, extract } as const;
-}
+};
 
-function buildPrompt(extract: ExtractedPage, mode: 'auto' | 'page' | 'video') {
+const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode) => {
   const { url, title, mainText, video } = extract;
   const header = `You are a concise expert summarizer. Summarize the content at the URL below.\n\nURL: ${url}\nTitle: ${title}\nMode: ${mode}`;
 
@@ -70,4 +71,4 @@ function buildPrompt(extract: ExtractedPage, mode: 'auto' | 'page' | 'video') {
   const task = `\n\nTask: Provide a high-quality elaborate summary.\n- If an actual video transcript is available, prioritize it; otherwise use page content.\n- Include 5-10 key bullet points, a brief TL;DR (1-2 sentences), and any action items or references.\n- Keep it factual and neutral.\n- If information is insufficient, state assumptions clearly.`;
 
   return `${header}${videoBlock}${contentBlock}${task}`;
-}
+};

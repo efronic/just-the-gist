@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -25,8 +26,7 @@ function copyDirSync(srcDir, destDir) {
 function copyStatic() {
   const files = [
     ['src/popup.html', 'dist/popup.html'],
-    ['src/popup.css', 'dist/popup.css'],
-    ['src/options.html', 'dist/options.html']
+    ['src/options.html', 'dist/options.html'],
   ];
   for (const [src, dest] of files) {
     const s = path.join(root, src);
@@ -37,19 +37,38 @@ function copyStatic() {
   copyDirSync(path.join(root, 'icons'), path.join(root, 'dist/icons'));
 }
 
+function compileTailwind() {
+  const input = path.join(root, 'src/tailwind.css');
+  const output = path.join(root, 'dist/tailwind.css');
+  if (!fs.existsSync(input)) return; // nothing to do if no tailwind input
+  try {
+    execSync(`npx tailwindcss -i "${input}" -o "${output}" --minify`, {
+      stdio: 'inherit',
+    });
+  } catch (err) {
+    console.warn(
+      '[build] Tailwind CSS compile failed. Did you run npm install?\n',
+      err?.message || err
+    );
+  }
+}
+
 function emitManifestForDist() {
   const manifestPath = path.join(root, 'manifest.json');
   if (!fs.existsSync(manifestPath)) return;
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
-  const stripDist = (p) => (typeof p === 'string' ? p.replace(/^dist\//, '') : p);
+  const stripDist = (p) =>
+    typeof p === 'string' ? p.replace(/^dist\//, '') : p;
 
   // Adjust paths because manifest will live inside dist/
   if (manifest.action?.default_popup) {
     manifest.action.default_popup = stripDist(manifest.action.default_popup);
   }
   if (manifest.background?.service_worker) {
-    manifest.background.service_worker = stripDist(manifest.background.service_worker);
+    manifest.background.service_worker = stripDist(
+      manifest.background.service_worker
+    );
   }
   if (manifest.options_page) {
     manifest.options_page = stripDist(manifest.options_page);
@@ -61,7 +80,10 @@ function emitManifestForDist() {
   }
 
   // Icons are copied as-is into dist/icons and paths remain the same
-  fs.writeFileSync(path.join(dist, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(
+    path.join(dist, 'manifest.json'),
+    JSON.stringify(manifest, null, 2)
+  );
 }
 
 async function main() {
@@ -75,7 +97,7 @@ async function main() {
       'src/contentScript.ts',
       'src/popup.ts',
       'src/options.ts',
-      'src/gemini.ts'
+      'src/gemini.ts',
     ],
     outdir: 'dist',
     bundle: true,
@@ -83,16 +105,18 @@ async function main() {
     platform: 'browser',
     target: ['chrome114', 'edge114'],
     sourcemap: true,
-    logLevel: 'info'
+    logLevel: 'info',
   });
 
   copyStatic();
+  compileTailwind();
   emitManifestForDist();
 
   if (watch) {
     console.log('Watching for changes...');
     fs.watch(path.join(root, 'src'), { recursive: true }, async () => {
       copyStatic();
+      compileTailwind();
     });
     // Re-copy icons on change as well
     if (fs.existsSync(path.join(root, 'icons'))) {
