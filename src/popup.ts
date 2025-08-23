@@ -143,7 +143,12 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
 
 const init = async () => {
   const tab = await getActiveTab();
-  (document.getElementById('url') as HTMLElement).textContent = tab?.url || '';
+  const urlEl = document.getElementById('url');
+  if (urlEl instanceof HTMLInputElement) {
+    urlEl.value = tab?.url || '';
+  } else if (urlEl) {
+    urlEl.textContent = tab?.url || '';
+  }
 
   document.getElementById('openOptions')!.addEventListener('click', (e) => {
     e.preventDefault();
@@ -226,6 +231,15 @@ const init = async () => {
   const detailLevelSel = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
   if (detailLevelSel && DETAIL_LEVEL) detailLevelSel.value = DETAIL_LEVEL;
 
+  // Copy URL button (new design)
+  document.getElementById('copyUrl')?.addEventListener('click', () => {
+    const urlInput = document.getElementById('url') as HTMLInputElement | HTMLElement | null;
+    const text = (urlInput as HTMLInputElement)?.value || urlInput?.textContent || '';
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => setStatus('URL copied')).catch(() => setStatus('Copy failed'));
+    setTimeout(() => setStatus(''), 1200);
+  });
+
   btn.addEventListener('click', async () => {
     const mode = (document.getElementById('mode') as HTMLSelectElement).value as SummarizeMode;
     const detailLevel = (detailLevelSel?.value || 'standard');
@@ -236,9 +250,8 @@ const init = async () => {
       const { text } = await summarize(mode, detailLevel);
       setOutput(text);
       setStatus('Done');
-      // After summarizing, attempt to load transcript preview (cues should now be cached)
-      const tab2 = await getActiveTab();
-      await loadTranscriptIntoPopup(tab2?.url);
+      // Invalidate transcript loaded flag so it reloads when transcript tab opened
+      transcriptLoadedFlag = false;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setStatus(msg);
@@ -246,14 +259,36 @@ const init = async () => {
       btn.disabled = false;
     }
   });
-
-  // Initial attempt (in case the transcript was already cached from earlier run)
-  if (SHOW_TRANSCRIPT_PANEL !== false) {
-    await loadTranscriptIntoPopup(tab?.url);
-  } else {
-    const container = document.getElementById('transcriptContainer');
-    container && container.classList.add('hidden');
-  }
+  // Tabs setup
+  const tabSummaryBtn = document.getElementById('tabSummary');
+  const tabTranscriptBtn = document.getElementById('tabTranscript');
+  const summaryTab = document.getElementById('summaryTab');
+  const transcriptPanelWrapper = document.getElementById('transcriptTabPanel');
+  let transcriptLoadedFlag = false;
+  const activateTab = async (name: 'summary' | 'transcript') => {
+    if (name === 'summary') {
+      tabSummaryBtn?.setAttribute('aria-selected', 'true');
+      tabTranscriptBtn?.setAttribute('aria-selected', 'false');
+      summaryTab?.classList.remove('hidden');
+      transcriptPanelWrapper?.classList.add('hidden');
+    } else {
+      tabSummaryBtn?.setAttribute('aria-selected', 'false');
+      tabTranscriptBtn?.setAttribute('aria-selected', 'true');
+      summaryTab?.classList.add('hidden');
+      transcriptPanelWrapper?.classList.remove('hidden');
+      if (!transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
+        await loadTranscriptIntoPopup(tab?.url);
+        transcriptLoadedFlag = true;
+        const container = document.getElementById('transcriptContainer');
+        const noMsg = document.getElementById('noTranscriptMsg');
+        if (container && container.classList.contains('hidden') && noMsg) noMsg.classList.remove('hidden');
+      }
+    }
+  };
+  tabSummaryBtn?.addEventListener('click', () => activateTab('summary'));
+  tabTranscriptBtn?.addEventListener('click', () => activateTab('transcript'));
+  // Default to summary tab
+  await activateTab('summary');
 
   // Button actions
   document.getElementById('copyTranscript')?.addEventListener('click', () => {
