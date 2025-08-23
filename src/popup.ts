@@ -265,15 +265,28 @@ const init = async () => {
   const summaryTab = document.getElementById('summaryTab');
   const transcriptPanelWrapper = document.getElementById('transcriptTabPanel');
   let transcriptLoadedFlag = false;
+  const ACTIVE_CLASSES = ['bg-white', 'text-slate-900'];
+  const INACTIVE_CLASSES = ['bg-slate-100', 'text-slate-600'];
+  const setTabVisual = (btn: HTMLElement | null, active: boolean) => {
+    if (!btn) return;
+    const add = active ? ACTIVE_CLASSES : INACTIVE_CLASSES;
+    const remove = active ? INACTIVE_CLASSES : ACTIVE_CLASSES;
+    btn.classList.add(...add);
+    btn.classList.remove(...remove);
+  };
   const activateTab = async (name: 'summary' | 'transcript') => {
     if (name === 'summary') {
       tabSummaryBtn?.setAttribute('aria-selected', 'true');
       tabTranscriptBtn?.setAttribute('aria-selected', 'false');
+      setTabVisual(tabSummaryBtn as HTMLElement, true);
+      setTabVisual(tabTranscriptBtn as HTMLElement, false);
       summaryTab?.classList.remove('hidden');
       transcriptPanelWrapper?.classList.add('hidden');
     } else {
       tabSummaryBtn?.setAttribute('aria-selected', 'false');
       tabTranscriptBtn?.setAttribute('aria-selected', 'true');
+      setTabVisual(tabSummaryBtn as HTMLElement, false);
+      setTabVisual(tabTranscriptBtn as HTMLElement, true);
       summaryTab?.classList.add('hidden');
       transcriptPanelWrapper?.classList.remove('hidden');
       if (!transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body class="font-sans antialiased bg-slate-50 text-slate-800">
-    <div class="w-[440px] p-4 space-y-4">
+    <div class="w-[460px] h-[600px] overflow-y-auto p-4 space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-lg font-semibold tracking-tight">Just the Gist</h1>
         <button
@@ -20,14 +20,14 @@
       </div>
       <!-- Tabs -->
       <div
-        class="flex border-b border-slate-300 text-[12px] font-medium select-none"
+        class="flex w-full text-[12px] font-medium select-none rounded-md shadow-sm"
         role="tablist"
       >
         <button
           id="tabSummary"
           role="tab"
           aria-selected="true"
-          class="px-3 py-2 -mb-px border-b-2 border-orange-600 text-orange-700 focus:outline-none"
+          class="flex-1 px-3 py-2 rounded-l-md border border-slate-300 bg-white text-slate-900 focus:outline-none"
         >
           Summary
         </button>
@@ -35,7 +35,7 @@
           id="tabTranscript"
           role="tab"
           aria-selected="false"
-          class="px-3 py-2 -mb-px border-b-2 border-transparent text-slate-600 hover:text-slate-800 focus:outline-none"
+          class="flex-1 px-3 py-2 rounded-r-md border border-slate-300 border-l-0 bg-slate-100 text-slate-600 hover:text-slate-800 focus:outline-none"
         >
           Transcript
         </button>
@@ -144,7 +144,7 @@
         <div id="status" class="text-[10px] text-slate-600"></div>
         <pre
           id="output"
-          class="max-h-72 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
+          class="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
         ></pre>
       </div>
       <!-- Transcript Tab Content -->
@@ -211,7 +211,7 @@
           </div>
           <div
             id="transcriptPreview"
-            class="max-h-72 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white p-3 text-[12px] leading-relaxed"
+            class="max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white p-3 text-[12px] leading-relaxed"
           ></div>
         </section>
         <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">
