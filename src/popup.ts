@@ -75,9 +75,8 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
       return;
     }
     const fullText = entry.cues.map(c => c.text).join(' ');
-    const previewLimit = 3000; // chars for initial collapsed preview
-    const truncatedPreview = fullText.length > previewLimit ? fullText.slice(0, previewLimit) + '\n...[preview truncated]' : fullText;
-    previewEl.textContent = truncatedPreview;
+    // Always store & display full transcript content (height is constrained via CSS for collapsed view)
+    previewEl.textContent = fullText;
     metaEl.textContent = `Language: ${entry.lang || 'unknown'} • Cues: ${entry.cues.length}${entry.truncated ? ' • (truncated at capture)' : ''}`;
     container.classList.remove('hidden');
     // Attach data attributes for later copy/download
@@ -248,15 +247,15 @@ const init = async () => {
     const full = container?._fullTranscript as string | undefined;
     if (!previewEl || !full) return;
     if (!expanded) {
-      previewEl.textContent = full;
-      previewEl.classList.remove('max-h-32', 'overflow-hidden');
+      previewEl.textContent = full; // full text already
+      previewEl.classList.remove('max-h-32');
+      previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
       btnToggle.textContent = 'Collapse';
       btnToggle.setAttribute('data-expanded', 'true');
       persistExpandState(container?._videoId, true);
     } else {
-      const previewLimit = 3000;
-      const truncatedPreview = full.length > previewLimit ? full.slice(0, previewLimit) + '\n...[preview truncated]' : full;
-      previewEl.textContent = truncatedPreview;
+      // Collapse: keep full text but restrict height (scroll remains available)
+      previewEl.textContent = full;
       previewEl.classList.remove('max-h-[600px]');
       previewEl.classList.add('max-h-32');
       btnToggle.textContent = 'Expand';
@@ -274,13 +273,7 @@ const init = async () => {
       const full = container?._fullTranscript as string | undefined;
       const previewEl = document.getElementById('transcriptPreview');
       if (!full || !previewEl) return;
-      if (!term) {
-        const expanded = (document.getElementById('toggleTranscript')?.getAttribute('data-expanded') === 'true');
-        if (expanded) previewEl.textContent = full; else {
-          const previewLimit = 3000; const truncatedPreview = full.length > previewLimit ? full.slice(0, previewLimit) + '\n...[preview truncated]' : full; previewEl.textContent = truncatedPreview;
-        }
-        return;
-      }
+      if (!term) { previewEl.textContent = full; return; }
       try {
         const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
         // Simple highlight by splitting and wrapping; since <pre> we can inject <mark>
