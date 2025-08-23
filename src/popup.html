@@ -78,34 +78,36 @@
             <a href="#" id="openOptions2" class="text-orange-600 hover:underline">Options</a>.
           </div>
         </div>
-        <!-- URL Input with inline copy -->
-        <div class="relative">
+        <!-- URL Input with inline copy (flex group) -->
+        <div>
           <label for="url" class="sr-only">URL</label>
-          <input
-            id="url"
-            type="text"
-            value=""
-            readonly
-            class="w-full rounded-md border border-slate-300 bg-white pr-9 pl-3 py-2 text-[11px] text-slate-700 focus:border-orange-500 focus:ring-orange-500"
-          />
-          <button
-            id="copyUrl"
-            type="button"
-            aria-label="Copy URL"
-            class="absolute inset-y-0 right-0 flex items-center px-2 text-slate-500 hover:text-slate-800 focus:outline-none"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              class="w-4 h-4"
+          <div class="flex items-stretch rounded-md border border-slate-300 bg-white focus-within:ring-1 focus-within:ring-orange-500 focus-within:border-orange-500">
+            <input
+              id="url"
+              type="text"
+              value=""
+              readonly
+              class="flex-1 bg-transparent border-0 px-3 py-2 text-[11px] text-slate-700 focus:outline-none focus:ring-0"
+            />
+            <button
+              id="copyUrl"
+              type="button"
+              aria-label="Copy URL"
+              class="px-2 border-l border-slate-300 text-slate-500 hover:text-slate-800 focus:outline-none flex items-center"
             >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="w-4 h-4"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+          </div>
         </div>
         <!-- Controls -->
         <div class="grid grid-cols-2 gap-3">
