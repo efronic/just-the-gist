@@ -77,13 +77,25 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const pageLimit = pageCharLimits[detailLevel] ?? 8000;
   const contentBlock = `\n\nExtracted page text (truncated to ${pageLimit} chars):\n${(mainText || '').slice(0, pageLimit)}`;
 
-  // Adjust cue preview length
-  const cueLimits: Record<string, number> = { concise: 40, standard: 80, detailed: 140, expanded: 220 };
-  const cueLimit = cueLimits[detailLevel] ?? 60;
+  // Cue inclusion policy: full coverage for detailed & expanded, larger slice for standard
   const cuesAll = video?.cues || [];
-  const cuesPreview = cuesAll.slice(0, cueLimit).map((c, i) => `${i + 1}. [${c.startTime}-${c.endTime}] ${c.text}`).join('\n');
+  const cueLimits: Record<string, number> = {
+    concise: 60,
+    standard: 200,
+    detailed: Number.POSITIVE_INFINITY,
+    expanded: Number.POSITIVE_INFINITY
+  };
+  const cueLimit = cueLimits[detailLevel] ?? 120;
+  const includeAll = !isFinite(cueLimit);
+  const cuesUsed = includeAll ? cuesAll : cuesAll.slice(0, cueLimit);
+
+  // Format cues compactly to reduce token usage: merge small gaps optional (future). For now simple list.
+  const cuesText = cuesUsed.map((c, i) => `${i + 1}. [${c.startTime}-${c.endTime}] ${c.text}`).join('\n');
+  const coverageLine = includeAll
+    ? `Transcript cues included: ALL (${cuesAll.length})`
+    : `Transcript cues included: ${cuesUsed.length} of ${cuesAll.length}${cuesAll.length > cuesUsed.length ? ' (partial for brevity)' : ''}`;
   const cuesBlock = video?.hasVideo
-    ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\n${transcriptMeta}\nTranscript cues shown: ${Math.min(cuesAll.length, cueLimit)} of ${cuesAll.length}${cuesAll.length > cueLimit ? ' (truncated preview)' : ''}\n${cuesPreview}`
+    ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\n${transcriptMeta}\n${coverageLine}\n${cuesText}`
     : `\n\nVideo detected: no`;
 
   const styleInstructions: Record<string, string> = {

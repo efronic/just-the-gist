@@ -6,9 +6,10 @@ import type { YtCaptionTrackMeta, InnertubeMeta, FetchTranscriptResult } from '.
 
 const preferredLangsBase = ['en', 'en-US', 'en-GB', 'en-CA', 'en-AU', 'en-IN'];
 
+const MAX_CACHE_CHAR_LEN = 150000; // Raised to allow near-complete transcripts
 const saveTranscriptCache = async (cacheKey: string, cues: ExtractedCue[], lang?: string) => {
     let truncated = false; let total = 0; const limited: ExtractedCue[] = [];
-    for (const c of cues) { total += c.text.length; if (total > 50000) { truncated = true; break; } limited.push(c); }
+    for (const c of cues) { total += c.text.length; if (total > MAX_CACHE_CHAR_LEN) { truncated = true; break; } limited.push(c); }
     try { await chrome.storage.local.set({ [cacheKey]: { cues: limited, lang, truncated } }); } catch { }
 };
 
