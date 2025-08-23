@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,18 +10,11 @@
     <div class="w-[360px] p-3 font-sans">
       <header class="flex items-baseline justify-between mb-3">
         <h1 class="text-base m-0">Just The Gist</h1>
-        <a
-          id="openOptions"
-          href="#"
-          class="text-sm text-blue-600 hover:underline"
-          >Options</a
-        >
+        <a id="openOptions" href="#" class="text-sm text-blue-600 hover:underline">Options</a>
       </header>
 
       <div id="apiSection" class="space-y-2" style="display: none">
-        <label for="apiKey" class="block font-semibold mt-2"
-          >Google Gemini API key</label
-        >
+        <label for="apiKey" class="block font-semibold mt-2">Google Gemini API key</label>
         <input
           id="apiKey"
           type="password"
@@ -29,29 +22,21 @@
           class="w-full p-2 text-sm border border-gray-300 rounded"
         />
         <label for="apiModel" class="block font-semibold mt-2">Model</label>
-        <select
-          id="apiModel"
-          class="w-full p-2 text-sm border border-gray-300 rounded"
-        >
+        <select id="apiModel" class="w-full p-2 text-sm border border-gray-300 rounded">
           <option value="gemini-2.5-flash">gemini-2.5-flash</option>
           <option value="gemini-1.5-flash">gemini-1.5-flash</option>
           <option value="gemini-1.5-pro">gemini-1.5-pro</option>
           <option value="gemini-1.0-pro">gemini-1.0-pro</option>
         </select>
         <div class="flex items-center gap-2 mt-1">
-          <button
-            id="saveApi"
-            class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
-          >
+          <button id="saveApi" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
             Save API settings
           </button>
           <span id="apiStatus" class="text-xs text-gray-600"></span>
         </div>
         <div class="text-xs text-gray-600 break-all">
           You can also manage this in
-          <a href="#" id="openOptions2" class="text-blue-600 hover:underline"
-            >Options</a
-          >.
+          <a href="#" id="openOptions2" class="text-blue-600 hover:underline">Options</a>.
         </div>
       </div>
 
@@ -75,6 +60,56 @@
         id="output"
         class="mt-2 max-h-80 overflow-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded"
       ></pre>
+      <div id="transcriptContainer" class="mt-4 hidden">
+        <div class="flex items-start justify-between mb-1 gap-2">
+          <div class="flex-1 min-w-0">
+            <h2 class="text-sm font-semibold m-0">Transcript</h2>
+            <input
+              id="transcriptSearch"
+              type="text"
+              placeholder="Search…"
+              class="mt-1 w-full px-2 py-1 text-[11px] border border-gray-300 rounded"
+            />
+          </div>
+          <div class="flex flex-col gap-1 items-end">
+            <div class="flex gap-1">
+              <button
+                id="copyTranscript"
+                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Copy
+              </button>
+              <button
+                id="copyTranscriptTs"
+                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Copy+TS
+              </button>
+              <button
+                id="downloadTranscript"
+                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                DL
+              </button>
+            </div>
+            <button
+              id="toggleTranscript"
+              class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              data-expanded="false"
+            >
+              Expand
+            </button>
+          </div>
+        </div>
+        <div
+          id="transcriptMeta"
+          class="text-[10px] text-gray-500 mb-1 flex items-center justify-between gap-2"
+        ></div>
+        <pre
+          id="transcriptPreview"
+          class="max-h-32 overflow-hidden whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded text-[11px]"
+        ></pre>
+      </div>
     </div>
     <script type="module" src="popup.js"></script>
   </body>
