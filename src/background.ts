@@ -7,7 +7,7 @@ import { SUMMARIZE_MODE } from './types/extract';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'justthegist',
-    title: 'Summarize with Just The Gist',
+    title: 'Summarize with Just the Gist',
     contexts: ['page', 'selection']
   });
 });

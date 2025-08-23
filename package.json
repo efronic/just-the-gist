@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Just The Gist: summarize the current page/video with LLMs.",
+  "description": "Just the Gist: summarize the current page/video with LLMs.",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "node scripts/build.mjs",

@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Just The Gist</title>
+    <title>Just the Gist</title>
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body>
-    <div class="w-[360px] p-3 font-sans">
+    <div class="w-[380px] p-3 font-sans text-[13.5px]">
       <header class="flex items-baseline justify-between mb-3">
-        <h1 class="text-base m-0">Just The Gist</h1>
+        <h1 class="text-[15px] font-semibold m-0 tracking-tight">Just the Gist</h1>
         <a id="openOptions" href="#" class="text-sm text-blue-600 hover:underline">Options</a>
       </header>
 
@@ -72,19 +72,19 @@
       <div class="text-xs text-gray-600 break-all mt-2" id="url"></div>
       <button
         id="summarizeBtn"
-        class="mt-2 px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
+        class="mt-2 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-[13px] font-medium shadow-sm"
       >
         Summarize this page
       </button>
       <div id="status" class="text-xs text-gray-600 mt-2"></div>
       <pre
         id="output"
-        class="mt-2 max-h-80 overflow-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded"
+        class="mt-2 max-h-80 overflow-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-3 rounded text-[12.5px] leading-snug"
       ></pre>
       <div id="transcriptContainer" class="mt-4 hidden">
         <div class="flex items-start justify-between mb-1 gap-2">
           <div class="flex-1 min-w-0">
-            <h2 class="text-sm font-semibold m-0">Transcript</h2>
+            <h2 class="text-sm font-semibold m-0 tracking-tight">Transcript</h2>
             <input
               id="transcriptSearch"
               type="text"
@@ -96,26 +96,26 @@
             <div class="flex gap-1">
               <button
                 id="copyTranscript"
-                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                class="text-[11px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 Copy
               </button>
               <button
                 id="copyTranscriptTs"
-                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                class="text-[11px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 Copy+TS
               </button>
               <button
                 id="downloadTranscript"
-                class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                class="text-[11px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 DL
               </button>
             </div>
             <button
               id="toggleTranscript"
-              class="text-[10px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+              class="text-[11px] px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
               data-expanded="false"
             >
               Expand
@@ -138,7 +138,7 @@
         </div>
         <div
           id="transcriptPreview"
-          class="max-h-32 overflow-y-auto bg-gray-50 border border-gray-200 p-2 rounded text-[11px] leading-relaxed prose prose-sm max-w-none"
+          class="max-h-32 overflow-y-auto bg-gray-50 border border-gray-200 p-2 rounded text-[14px] leading-relaxed prose prose-sm max-w-none"
         ></div>
       </div>
     </div>

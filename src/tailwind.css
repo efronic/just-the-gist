@@ -1,3 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Base typography adjustments */
+body,
+.font-sans {
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+}
+body {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+pre,
+code {
+  font-family: theme('fontFamily.mono');
+  font-size: 12px;
+}
+
+#transcriptPreview p {
+  line-height: 1.4;
+}
+
+/* Compact paragraph mode spacing handled via inline classes; ensure last paragraph spacing trimmed */
+#transcriptPreview p:last-child {
+  margin-bottom: 0 !important;
+}

@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Just The Gist — Options</title>
+    <title>Just the Gist — Options</title>
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body>
-    <div class="max-w-2xl mx-auto px-4 py-6 font-sans">
-      <h1 class="text-xl font-semibold">Just The Gist — Options</h1>
-      <p class="text-sm text-gray-600 mt-2">
+    <div class="max-w-2xl mx-auto px-4 py-6 font-sans text-[14px]">
+      <h1 class="text-[20px] font-semibold tracking-tight">Just The Gist — Options</h1>
+      <p class="text-[13px] text-gray-600 mt-2 leading-relaxed">
         Your API key is stored in Chrome sync storage. It never leaves your browser except when
         calling Google Gemini.
       </p>
@@ -19,11 +19,14 @@
         id="apiKey"
         type="text"
         placeholder="AIza..."
-        class="w-full p-2 text-sm border border-gray-300 rounded"
+        class="w-full px-3 py-2 text-[13px] border border-gray-300 rounded-md shadow-sm"
       />
 
       <label for="model" class="block font-semibold mt-4">Model</label>
-      <select id="model" class="w-full p-2 text-sm border border-gray-300 rounded">
+      <select
+        id="model"
+        class="w-full px-3 py-2 text-[13px] border border-gray-300 rounded-md shadow-sm"
+      >
         <option value="gemini-2.5-flash">gemini-2.5-flash</option>
         <option value="gemini-1.5-flash">gemini-1.5-flash</option>
         <option value="gemini-1.5-pro">gemini-1.5-pro</option>
@@ -31,45 +34,51 @@
       </select>
 
       <label for="detailLevel" class="block font-semibold mt-4">Default summary detail level</label>
-      <select id="detailLevel" class="w-full p-2 text-sm border border-gray-300 rounded">
+      <select
+        id="detailLevel"
+        class="w-full px-3 py-2 text-[13px] border border-gray-300 rounded-md shadow-sm"
+      >
         <option value="concise">Concise</option>
         <option value="standard" selected>Standard</option>
         <option value="detailed">Detailed</option>
         <option value="expanded">Expanded (very detailed)</option>
       </select>
-      <p class="text-xs text-gray-500 mt-1">
+      <p class="text-[11px] text-gray-500 mt-1 leading-snug">
         Higher detail levels include more transcript/page coverage, structured sections (key points,
         detailed walkthrough, quotes, data, Q&A), and longer output.
       </p>
 
       <div class="mt-4 flex items-center gap-2">
-        <button id="saveBtn" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
+        <button
+          id="saveBtn"
+          class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-[13px] font-medium shadow-sm"
+        >
           Save
         </button>
-        <span id="status" class="text-xs text-gray-600"></span>
+        <span id="status" class="text-[11px] text-gray-600"></span>
       </div>
 
       <div class="mt-6 border-t border-gray-200 pt-4">
-        <h2 class="font-semibold text-sm">Transcripts</h2>
-        <label class="flex items-center gap-2 mt-2 text-sm">
+        <h2 class="font-semibold text-sm tracking-tight">Transcripts</h2>
+        <label class="flex items-center gap-2 mt-2 text-[13px]">
           <input id="disableTranscripts" type="checkbox" class="h-4 w-4" />
           <span>Disable automatic transcript fetching (YouTube captions)</span>
         </label>
-        <p class="text-xs text-gray-500 mt-1">
+        <p class="text-[11px] text-gray-500 mt-1 leading-snug">
           If enabled, summaries will rely only on visible page text and metadata. Useful for privacy
           or if transcript fetching causes issues.
         </p>
-        <label class="flex items-center gap-2 mt-3 text-sm">
+        <label class="flex items-center gap-2 mt-3 text-[13px]">
           <input id="showTranscriptPanel" type="checkbox" class="h-4 w-4" />
           <span>Show transcript panel in popup</span>
         </label>
-        <p class="text-xs text-gray-500 mt-1">
+        <p class="text-[11px] text-gray-500 mt-1 leading-snug">
           Uncheck to hide the transcript UI (you can still fetch & use transcripts for
           summarization).
         </p>
       </div>
 
-      <p class="text-sm text-gray-600 mt-4">
+      <p class="text-[13px] text-gray-600 mt-4 leading-relaxed">
         Tip: You can create an API key from the
         <a
           class="text-blue-600 hover:underline"
