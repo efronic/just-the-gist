@@ -41,12 +41,33 @@
       </div>
 
       <div class="mt-2">
-        <label for="mode" class="mr-2">Summarize:</label>
-        <select id="mode" class="p-1.5 text-sm border border-gray-300 rounded">
-          <option value="auto" selected>Auto</option>
-          <option value="page">Page</option>
-          <option value="video">Video</option>
-        </select>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-gray-600 mb-1" for="mode">Mode</label>
+            <select
+              id="mode"
+              class="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+            >
+              <option>auto</option>
+              <option>page</option>
+              <option>video</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-gray-600 mb-1" for="detailLevelSelect"
+              >Detail</label
+            >
+            <select
+              id="detailLevelSelect"
+              class="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+            >
+              <option value="concise">Concise</option>
+              <option value="standard" selected>Standard</option>
+              <option value="detailed">Detailed</option>
+              <option value="expanded">Expanded</option>
+            </select>
+          </div>
+        </div>
       </div>
       <div class="text-xs text-gray-600 break-all mt-2" id="url"></div>
       <button
@@ -107,7 +128,7 @@
         ></div>
         <pre
           id="transcriptPreview"
-          class="max-h-32 overflow-hidden whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded text-[11px]"
+          class="max-h-32 overflow-y-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded text-[11px]"
         ></pre>
       </div>
     </div>

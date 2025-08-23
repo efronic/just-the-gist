@@ -30,6 +30,18 @@
         <option value="gemini-1.0-pro">gemini-1.0-pro</option>
       </select>
 
+      <label for="detailLevel" class="block font-semibold mt-4">Default summary detail level</label>
+      <select id="detailLevel" class="w-full p-2 text-sm border border-gray-300 rounded">
+        <option value="concise">Concise</option>
+        <option value="standard" selected>Standard</option>
+        <option value="detailed">Detailed</option>
+        <option value="expanded">Expanded (very detailed)</option>
+      </select>
+      <p class="text-xs text-gray-500 mt-1">
+        Higher detail levels include more transcript/page coverage, structured sections (key points,
+        detailed walkthrough, quotes, data, Q&A), and longer output.
+      </p>
+
       <div class="mt-4 flex items-center gap-2">
         <button id="saveBtn" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
           Save

@@ -16,14 +16,15 @@ const setOutput = (text?: string) => {
 import type { SummarizeMode } from './types/extract';
 import { SUMMARIZE_MODE } from './types/extract';
 
-const summarize = async (mode: SummarizeMode) => {
+const summarize = async (mode: SummarizeMode, detailLevel: string) => {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
 
   const resp = await chrome.runtime.sendMessage({
     type: 'SUMMARIZE_TAB',
     tabId: tab.id,
-    mode
+    mode,
+    detailLevel
   });
 
   if (!resp?.ok) throw new Error(resp?.error || 'Unknown error.');
@@ -90,7 +91,8 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     const toggleBtn = document.getElementById('toggleTranscript');
     if (expanded) {
       previewEl.textContent = fullText;
-      previewEl.classList.remove('max-h-32', 'overflow-hidden');
+      previewEl.classList.remove('max-h-32');
+      previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
       toggleBtn && toggleBtn.setAttribute('data-expanded', 'true');
       if (toggleBtn) toggleBtn.textContent = 'Collapse';
     }
@@ -111,10 +113,11 @@ const init = async () => {
   });
 
   // Load API settings to decide whether to show inline API section
-  const { GEMINI_API_KEY, GEMINI_MODEL, SHOW_TRANSCRIPT_PANEL } = await chrome.storage.sync.get({
+  const { GEMINI_API_KEY, GEMINI_MODEL, SHOW_TRANSCRIPT_PANEL, DETAIL_LEVEL } = await chrome.storage.sync.get({
     GEMINI_API_KEY: '',
     GEMINI_MODEL: 'gemini-2.5-flash',
-    SHOW_TRANSCRIPT_PANEL: true
+    SHOW_TRANSCRIPT_PANEL: true,
+    DETAIL_LEVEL: 'standard'
   });
 
   // Populate mode select from shared constants
@@ -177,13 +180,18 @@ const init = async () => {
   });
 
   const btn = document.getElementById('summarizeBtn') as HTMLButtonElement;
+  // Initialize detail level selector from storage
+  const detailLevelSel = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
+  if (detailLevelSel && DETAIL_LEVEL) detailLevelSel.value = DETAIL_LEVEL;
+
   btn.addEventListener('click', async () => {
     const mode = (document.getElementById('mode') as HTMLSelectElement).value as SummarizeMode;
+    const detailLevel = (detailLevelSel?.value || 'standard');
     btn.disabled = true;
     setStatus('Summarizing…');
     setOutput('');
     try {
-      const { text } = await summarize(mode);
+      const { text } = await summarize(mode, detailLevel);
       setOutput(text);
       setStatus('Done');
       // After summarizing, attempt to load transcript preview (cues should now be cached)
@@ -249,7 +257,8 @@ const init = async () => {
       const previewLimit = 3000;
       const truncatedPreview = full.length > previewLimit ? full.slice(0, previewLimit) + '\n...[preview truncated]' : full;
       previewEl.textContent = truncatedPreview;
-      previewEl.classList.add('max-h-32', 'overflow-hidden');
+      previewEl.classList.remove('max-h-[600px]');
+      previewEl.classList.add('max-h-32');
       btnToggle.textContent = 'Expand';
       btnToggle.setAttribute('data-expanded', 'false');
       persistExpandState(container?._videoId, false);
