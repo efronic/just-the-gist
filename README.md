@@ -1,4 +1,4 @@
-# JustTheGist (Chrome/Edge MV3)
+# Just The Gist (Chrome/Edge MV3)
 
 A minimal Chrome/Edge extension that summarizes the current page (and any detected video metadata and cues) with Google Gemini. The page URL is always included in the prompt.
 

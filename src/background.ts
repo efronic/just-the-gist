@@ -7,7 +7,7 @@ import { SUMMARIZE_MODE } from './types/extract';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'justthegist',
-    title: 'Summarize with JustTheGist',
+    title: 'Summarize with Just The Gist',
     contexts: ['page', 'selection']
   });
 });
@@ -62,13 +62,18 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode) => {
   const { url, title, mainText, video } = extract;
   const header = `You are a concise expert summarizer. Summarize the content at the URL below.\n\nURL: ${url}\nTitle: ${title}\nMode: ${mode}`;
 
-  const videoBlock = video?.hasVideo
-    ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\nVideo text tracks (first 30 cues if any):\n${(video.cues || []).slice(0, 30).map((c, i) => `${i + 1}. [${c.startTime}-${c.endTime}] ${c.text}`).join('\n')}`
+  const transcriptMeta = video?.hasVideo
+    ? `Transcript source: ${video.transcriptSource || 'none'}${video.transcriptLanguage ? `\nTranscript language: ${video.transcriptLanguage}` : ''}${video.transcriptTruncated ? '\nTranscript truncated: yes' : ''}`
+    : 'Transcript source: none';
+
+  const cuesPreview = (video?.cues || []).slice(0, 60).map((c, i) => `${i + 1}. [${c.startTime}-${c.endTime}] ${c.text}`).join('\n');
+  const cuesBlock = video?.hasVideo
+    ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\n${transcriptMeta}\nTranscript cues shown: ${Math.min((video.cues || []).length, 60)} of ${(video.cues || []).length}${(video.cues || []).length > 60 ? ' (truncated preview)' : ''}\n${cuesPreview}`
     : `\n\nVideo detected: no`;
 
   const contentBlock = `\n\nExtracted page text (truncated):\n${(mainText || '').slice(0, 8000)}`;
 
-  const task = `\n\nTask: Provide a high-quality elaborate summary.\n- If an actual video transcript is available, prioritize it; otherwise use page content.\n- Include 5-10 key bullet points, a brief TL;DR (1-2 sentences), and any action items or references.\n- Keep it factual and neutral.\n- If information is insufficient, state assumptions clearly.`;
+  const task = `\n\nTask: Provide a high-quality elaborate summary.\n- If transcript cues are present, treat them as authoritative spoken content.\n- Base the summary primarily on transcript; use page text for supplemental context.\n- Include 5-10 concise bullet points, a TL;DR (1-2 sentences), and any action items or references.\n- Be factual and neutral; avoid hallucinating content not supported by transcript.\n- If transcript source is 'none', clearly state limited confidence and rely on page/metadata.\n- If transcript truncated, still summarize; note possible missing later sections.`;
 
-  return `${header}${videoBlock}${contentBlock}${task}`;
+  return `${header}${cuesBlock}${contentBlock}${task}`;
 };

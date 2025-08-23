@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "JustTheGist",
+  "name": "Just The Gist",
   "version": "0.1.0",
-  "description": "JustTheGist: Summarize the current page or video with Google Gemini, including the page URL.",
+  "description": "Just The Gist: Summarize the current page or video with Google Gemini, including the page URL.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -10,7 +10,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Summarize with JustTheGist",
+    "default_title": "Summarize with Just The Gist",
     "default_popup": "dist/popup.html",
     "default_icon": {
       "16": "icons/action-16.png",

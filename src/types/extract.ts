@@ -25,6 +25,12 @@ export type ExtractedVideo = {
     durationSec?: number;
     // Up to N cues (e.g., from text tracks / captions)
     cues?: ExtractedCue[];
+    // Source of transcript cues: 'inpage' (from text tracks), 'fetched' (timedtext API), 'none'
+    transcriptSource?: 'inpage' | 'fetched' | 'none';
+    // Language code of transcript if known (e.g., 'en', 'en-US')
+    transcriptLanguage?: string;
+    // True if transcript was truncated for size limits
+    transcriptTruncated?: boolean;
     // Canonical video page URL if known (e.g., a YouTube watch URL)
     pageUrl?: string;
     // Detected video platform (used for platform-aware logic)

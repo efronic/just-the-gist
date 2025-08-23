@@ -1,22 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JustTheGist — Options</title>
+    <title>Just The Gist — Options</title>
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body>
     <div class="max-w-2xl mx-auto px-4 py-6 font-sans">
-      <h1 class="text-xl font-semibold">JustTheGist — Options</h1>
+      <h1 class="text-xl font-semibold">Just The Gist — Options</h1>
       <p class="text-sm text-gray-600 mt-2">
-        Your API key is stored in Chrome sync storage. It never leaves your
-        browser except when calling Google Gemini.
+        Your API key is stored in Chrome sync storage. It never leaves your browser except when
+        calling Google Gemini.
       </p>
 
-      <label for="apiKey" class="block font-semibold mt-4"
-        >Google Gemini API key</label
-      >
+      <label for="apiKey" class="block font-semibold mt-4">Google Gemini API key</label>
       <input
         id="apiKey"
         type="text"
@@ -25,10 +23,7 @@
       />
 
       <label for="model" class="block font-semibold mt-4">Model</label>
-      <select
-        id="model"
-        class="w-full p-2 text-sm border border-gray-300 rounded"
-      >
+      <select id="model" class="w-full p-2 text-sm border border-gray-300 rounded">
         <option value="gemini-2.5-flash">gemini-2.5-flash</option>
         <option value="gemini-1.5-flash">gemini-1.5-flash</option>
         <option value="gemini-1.5-pro">gemini-1.5-pro</option>
@@ -36,13 +31,22 @@
       </select>
 
       <div class="mt-4 flex items-center gap-2">
-        <button
-          id="saveBtn"
-          class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
+        <button id="saveBtn" class="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700">
           Save
         </button>
         <span id="status" class="text-xs text-gray-600"></span>
+      </div>
+
+      <div class="mt-6 border-t border-gray-200 pt-4">
+        <h2 class="font-semibold text-sm">Transcripts</h2>
+        <label class="flex items-center gap-2 mt-2 text-sm">
+          <input id="disableTranscripts" type="checkbox" class="h-4 w-4" />
+          <span>Disable automatic transcript fetching (YouTube captions)</span>
+        </label>
+        <p class="text-xs text-gray-500 mt-1">
+          If enabled, summaries will rely only on visible page text and metadata. Useful for privacy
+          or if transcript fetching causes issues.
+        </p>
       </div>
 
       <p class="text-sm text-gray-600 mt-4">
