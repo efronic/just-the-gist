@@ -56,6 +56,48 @@ const extractVideoIdFromUrl = (url?: string | null): string | null => {
   return null;
 };
 
+// Build rich HTML from cues
+const buildTranscriptHtml = (cues: StoredTranscript['cues'], opts: { showTs: boolean; compact: boolean; highlight?: string; }) => {
+  if (!cues.length) return '';
+  const PARAGRAPH_GAP_SEC = 4; // new paragraph if gap between cues exceeds this
+  const MAX_PARAGRAPH_DURATION = 30; // force break if a paragraph grows too long in seconds
+  const safe = (s: string) => s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const highlightTerm = opts.highlight?.trim();
+  const highlightRegex = highlightTerm ? new RegExp(highlightTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'ig') : null;
+  const fmtCue = (text: string) => {
+    const escaped = safe(text);
+    return highlightRegex ? escaped.replace(highlightRegex, m => `<mark class="bg-yellow-200">${m}</mark>`) : escaped;
+  };
+  const parts: string[] = [];
+  let para: typeof cues = [];
+  let paraStart = cues[0].startTime;
+  let lastEnd = cues[0].endTime;
+  const flush = () => {
+    if (!para.length) return;
+    const first = para[0];
+    const last = para[para.length - 1];
+    const duration = last.endTime - first.startTime;
+    const body = para.map(c => fmtCue(c.text)).join(opts.compact ? ' ' : ' ');
+    const tsLabel = opts.showTs ? `<span class="inline-block text-gray-500 mr-2 select-none">${formatTs(first.startTime)}</span>` : '';
+    parts.push(`<p class="m-0 ${opts.compact ? '' : 'mb-2'}">${tsLabel}${body}</p>`);
+    para = [];
+  };
+  for (const cue of cues) {
+    const gap = cue.startTime - lastEnd;
+    if (gap > PARAGRAPH_GAP_SEC || (cue.endTime - paraStart) > MAX_PARAGRAPH_DURATION) {
+      flush();
+      paraStart = cue.startTime;
+    }
+    para.push(cue);
+    lastEnd = cue.endTime;
+  }
+  flush();
+  return parts.join('\n');
+};
+
 const loadTranscriptIntoPopup = async (tabUrl?: string) => {
   const vid = extractVideoIdFromUrl(tabUrl);
   const container = document.getElementById('transcriptContainer');
@@ -75,8 +117,10 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
       return;
     }
     const fullText = entry.cues.map(c => c.text).join(' ');
-    // Always store & display full transcript content (height is constrained via CSS for collapsed view)
-    previewEl.textContent = fullText;
+    // Render as rich paragraphs
+    const showTs = (document.getElementById('transcriptShowTs') as HTMLInputElement | null)?.checked ?? true;
+    const compact = (document.getElementById('transcriptCompact') as HTMLInputElement | null)?.checked ?? false;
+    (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(entry.cues, { showTs, compact });
     metaEl.textContent = `Language: ${entry.lang || 'unknown'} • Cues: ${entry.cues.length}${entry.truncated ? ' • (truncated at capture)' : ''}`;
     container.classList.remove('hidden');
     // Attach data attributes for later copy/download
@@ -89,7 +133,6 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     const expanded = !!EXPANDED_TRANSCRIPTS[vid];
     const toggleBtn = document.getElementById('toggleTranscript');
     if (expanded) {
-      previewEl.textContent = fullText;
       previewEl.classList.remove('max-h-32');
       previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
       toggleBtn && toggleBtn.setAttribute('data-expanded', 'true');
@@ -247,7 +290,6 @@ const init = async () => {
     const full = container?._fullTranscript as string | undefined;
     if (!previewEl || !full) return;
     if (!expanded) {
-      previewEl.textContent = full; // full text already
       previewEl.classList.remove('max-h-32');
       previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
       btnToggle.textContent = 'Collapse';
@@ -255,7 +297,6 @@ const init = async () => {
       persistExpandState(container?._videoId, true);
     } else {
       // Collapse: keep full text but restrict height (scroll remains available)
-      previewEl.textContent = full;
       previewEl.classList.remove('max-h-[600px]');
       previewEl.classList.add('max-h-32');
       btnToggle.textContent = 'Expand';
@@ -263,6 +304,23 @@ const init = async () => {
       persistExpandState(container?._videoId, false);
     }
   });
+
+  // Timestamps & compact toggles
+  const tsCheckbox = document.getElementById('transcriptShowTs') as HTMLInputElement | null;
+  const compactCheckbox = document.getElementById('transcriptCompact') as HTMLInputElement | null;
+  const rerender = () => {
+    const container = document.getElementById('transcriptContainer') as any;
+    const previewEl = document.getElementById('transcriptPreview');
+    const cues = container?._cues as StoredTranscript['cues'] | undefined;
+    if (!cues || !previewEl) return;
+    const showTs = tsCheckbox?.checked ?? true;
+    const compact = compactCheckbox?.checked ?? false;
+    const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
+    const term = searchInput?.value.trim();
+    (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(cues, { showTs, compact, highlight: term });
+  };
+  tsCheckbox?.addEventListener('change', rerender);
+  compactCheckbox?.addEventListener('change', rerender);
 
   // Search interaction
   const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
@@ -273,16 +331,8 @@ const init = async () => {
       const full = container?._fullTranscript as string | undefined;
       const previewEl = document.getElementById('transcriptPreview');
       if (!full || !previewEl) return;
-      if (!term) { previewEl.textContent = full; return; }
-      try {
-        const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        // Simple highlight by splitting and wrapping; since <pre> we can inject <mark>
-        const highlighted = full.replace(regex, m => `[[HIGHLIGHT:${m}]]`);
-        const safe = highlighted.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        // Re-insert marks
-        const withMarks = safe.replace(/\[\[HIGHLIGHT:([\s\S]*?)\]\]/g, '<mark class="bg-yellow-200">$1</mark>');
-        previewEl.innerHTML = withMarks;
-      } catch { /* ignore bad regex */ }
+      if (!term) { rerender(); return; }
+      rerender();
     });
   }
 };

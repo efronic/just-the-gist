@@ -126,10 +126,20 @@
           id="transcriptMeta"
           class="text-[10px] text-gray-500 mb-1 flex items-center justify-between gap-2"
         ></div>
-        <pre
+        <div class="flex items-center justify-between mb-1">
+          <label class="flex items-center gap-1 text-[10px] text-gray-600">
+            <input id="transcriptShowTs" type="checkbox" class="scale-75" checked />
+            <span>Show timestamps</span>
+          </label>
+          <label class="flex items-center gap-1 text-[10px] text-gray-600">
+            <input id="transcriptCompact" type="checkbox" class="scale-75" />
+            <span>Compact</span>
+          </label>
+        </div>
+        <div
           id="transcriptPreview"
-          class="max-h-32 overflow-y-auto whitespace-pre-wrap bg-gray-50 border border-gray-200 p-2 rounded text-[11px]"
-        ></pre>
+          class="max-h-32 overflow-y-auto bg-gray-50 border border-gray-200 p-2 rounded text-[11px] leading-relaxed prose prose-sm max-w-none"
+        ></div>
       </div>
     </div>
     <script type="module" src="popup.js"></script>
