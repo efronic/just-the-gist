@@ -6,11 +6,11 @@
     <title>Just the Gist</title>
     <link rel="stylesheet" href="tailwind.css" />
   </head>
-  <body class="w-[480px] h-[620px] overflow-y-auto bg-base-100 text-base-content font-sans">
-    <header
-      class="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-4 py-3 flex items-center justify-between shadow"
-    >
-      <h1 class="text-lg font-semibold text-white tracking-tight">Just the Gist</h1>
+  <body
+    class="w-[480px] h-[620px] overflow-y-auto font-sans antialiased bg-slate-50 text-slate-800 dark:bg-base-100 dark:text-base-content"
+  >
+    <header class="bg-orange-600 px-3 py-2 flex items-center justify-between shadow-sm">
+      <h1 class="text-lg font-semibold tracking-tight text-white">Just the Gist</h1>
       <div class="flex items-center gap-2">
         <button
           id="themeToggle"
@@ -40,12 +40,19 @@
         </button>
       </div>
     </header>
-    <nav class="mt-2 px-4">
-      <div role="tablist" class="tabs tabs-lifted w-full text-xs">
-        <button id="tabSummary" role="tab" aria-selected="true" class="tab tab-active">
+    <nav class="mt-2 px-3">
+      <div role="tablist" class="tabs tabs-lifted w-full text-[12px] font-medium">
+        <button
+          id="tabSummary"
+          role="tab"
+          aria-selected="true"
+          class="tab tab-active [--tab-bg:theme(colors.orange.600)] text-white"
+        >
           Summary
         </button>
-        <button id="tabTranscript" role="tab" aria-selected="false" class="tab">Transcript</button>
+        <button id="tabTranscript" role="tab" aria-selected="false" class="tab text-slate-500">
+          Transcript
+        </button>
       </div>
     </nav>
     <main class="px-4 pb-6 space-y-6">
@@ -165,7 +172,7 @@
         <section id="transcriptContainer" class="space-y-3 hidden">
           <div
             id="transcriptPreview"
-            class="relative max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-base-100 text-[12px] leading-relaxed font-transcript gist-scrollbar"
+            class="relative max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-base-100 pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
           >
             <div
               id="transcriptToolbar"

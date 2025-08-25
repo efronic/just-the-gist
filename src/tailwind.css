@@ -52,9 +52,11 @@ html[data-theme='dark'] body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem; /* w-7 */
-  height: 1.75rem; /* h-7 */
+  width: 2.25rem; /* w-9 */
+  height: 2.25rem; /* h-9 */
   border-radius: 0.375rem; /* rounded-md */
+  font-size: 13px;
+  font-weight: 500;
   color: #475569; /* slate-600 */
   transition:
     color 120ms ease,
