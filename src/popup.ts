@@ -102,6 +102,7 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
   const vid = extractVideoIdFromUrl(tabUrl);
   const container = document.getElementById('transcriptContainer');
   const previewEl = document.getElementById('transcriptPreview');
+  const contentEl = document.getElementById('transcriptContent');
   const metaEl = document.getElementById('transcriptMeta');
   if (!container || !previewEl || !metaEl) return;
   if (!vid) {
@@ -118,11 +119,11 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     }
     const fullText = entry.cues.map(c => c.text).join(' ');
     // Render as rich paragraphs using button toggle state (aria-pressed)
-    const showTsBtn = document.getElementById('transcriptShowTsToggle');
-    const compactBtn = document.getElementById('transcriptCompactToggle');
+    const showTsBtn = document.getElementById('tbToggleTs');
+    const compactBtn = document.getElementById('tbCompact');
     const showTs = showTsBtn ? showTsBtn.getAttribute('aria-pressed') !== 'false' : true;
     const compact = compactBtn ? compactBtn.getAttribute('aria-pressed') === 'true' : false;
-    (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(entry.cues, { showTs, compact });
+    if (contentEl) (contentEl as HTMLElement).innerHTML = buildTranscriptHtml(entry.cues, { showTs, compact });
     metaEl.textContent = `Language: ${entry.lang || 'unknown'} • Cues: ${entry.cues.length}${entry.truncated ? ' • (truncated at capture)' : ''}`;
     container.classList.remove('hidden');
     // Attach data attributes for later copy/download
@@ -133,17 +134,17 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     // Restore expand state for this video if stored
     const { EXPANDED_TRANSCRIPTS } = await chrome.storage.local.get({ EXPANDED_TRANSCRIPTS: {} as Record<string, boolean> });
     const expanded = !!EXPANDED_TRANSCRIPTS[vid];
-    const toggleBtn = document.getElementById('toggleTranscript');
+    const toggleBtn = document.getElementById('tbExpand');
     if (expanded) {
       // Expanded state: allow more vertical space (initial preview starts with max-h-[420px])
-      previewEl.classList.remove('max-h-[420px]');
+      previewEl.classList.remove('max-h-80');
       previewEl.classList.add('max-h-[800px]', 'overflow-y-auto');
+      toggleBtn && toggleBtn.setAttribute('aria-pressed', 'true');
       toggleBtn && toggleBtn.setAttribute('data-expanded', 'true');
-      if (toggleBtn) toggleBtn.textContent = 'Collapse';
     } else {
       // Ensure collapsed baseline classes present
       previewEl.classList.remove('max-h-[800px]');
-      if (!previewEl.classList.contains('max-h-[420px]')) previewEl.classList.add('max-h-[420px]');
+      if (!previewEl.classList.contains('max-h-80')) previewEl.classList.add('max-h-80');
     }
   } catch { /* ignore */ }
 };
@@ -305,14 +306,14 @@ const init = async () => {
   await activateTab('summary');
 
   // Button actions
-  document.getElementById('copyTranscript')?.addEventListener('click', () => {
+  document.getElementById('tbCopy')?.addEventListener('click', () => {
     const container = document.getElementById('transcriptContainer') as any;
     const full = container?._fullTranscript as string | undefined;
     if (!full) return;
     navigator.clipboard.writeText(full).then(() => setStatus('Transcript copied')).catch(() => setStatus('Copy failed'));
     setTimeout(() => setStatus(''), 1500);
   });
-  document.getElementById('downloadTranscript')?.addEventListener('click', () => {
+  document.getElementById('tbDownload')?.addEventListener('click', () => {
     const container = document.getElementById('transcriptContainer') as any;
     const cues = container?._cues as StoredTranscript['cues'] | undefined;
     if (!cues?.length) return;
@@ -323,7 +324,7 @@ const init = async () => {
     a.download = 'transcript.txt';
     a.click();
   });
-  document.getElementById('copyTranscriptTs')?.addEventListener('click', () => {
+  document.getElementById('tbCopyTs')?.addEventListener('click', () => {
     const container = document.getElementById('transcriptContainer') as any;
     const cues = container?._cues as StoredTranscript['cues'] | undefined;
     if (!cues?.length) return;
@@ -331,52 +332,48 @@ const init = async () => {
     navigator.clipboard.writeText(lines.join('\n')).then(() => setStatus('Copied w/ timestamps')).catch(() => setStatus('Copy failed'));
     setTimeout(() => setStatus(''), 1500);
   });
-  document.getElementById('toggleTranscript')?.addEventListener('click', (e) => {
+  document.getElementById('tbExpand')?.addEventListener('click', (e) => {
     const btnToggle = e.currentTarget as HTMLButtonElement;
-    const expanded = btnToggle.getAttribute('data-expanded') === 'true';
+    const expanded = btnToggle.getAttribute('aria-pressed') === 'true';
     const container = document.getElementById('transcriptContainer') as any;
-    const previewEl = document.getElementById('transcriptPreview');
-    const full = container?._fullTranscript as string | undefined;
-    if (!previewEl || !full) return;
+    const preview = document.getElementById('transcriptPreview');
+    if (!preview) return;
     if (!expanded) {
-      previewEl.classList.remove('max-h-[420px]');
-      previewEl.classList.add('max-h-[800px]', 'overflow-y-auto');
-      btnToggle.textContent = 'Collapse';
+      preview.classList.remove('max-h-80');
+      preview.classList.add('max-h-[800px]', 'overflow-y-auto');
+      btnToggle.setAttribute('aria-pressed', 'true');
       btnToggle.setAttribute('data-expanded', 'true');
       persistExpandState(container?._videoId, true);
     } else {
-      // Collapse: revert to initial preview height
-      previewEl.classList.remove('max-h-[800px]');
-      previewEl.classList.add('max-h-[420px]');
-      btnToggle.textContent = 'Expand';
+      preview.classList.remove('max-h-[800px]');
+      preview.classList.add('max-h-80');
+      btnToggle.setAttribute('aria-pressed', 'false');
       btnToggle.setAttribute('data-expanded', 'false');
       persistExpandState(container?._videoId, false);
     }
   });
 
   // Timestamps & compact toggle buttons (aria-pressed state)
-  const tsBtn = document.getElementById('transcriptShowTsToggle');
-  const compactBtn = document.getElementById('transcriptCompactToggle');
+  const tsBtn = document.getElementById('tbToggleTs');
+  const compactBtn = document.getElementById('tbCompact');
   const rerender = () => {
     const container = document.getElementById('transcriptContainer') as any;
-    const previewEl = document.getElementById('transcriptPreview');
+    const content = document.getElementById('transcriptContent');
     const cues = container?._cues as StoredTranscript['cues'] | undefined;
-    if (!cues || !previewEl) return;
+    if (!cues || !content) return;
     const showTs = tsBtn ? tsBtn.getAttribute('aria-pressed') !== 'false' : true;
     const compact = compactBtn ? compactBtn.getAttribute('aria-pressed') === 'true' : false;
     const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
     const term = searchInput?.value.trim();
-    (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(cues, { showTs, compact, highlight: term });
+    (content as HTMLElement).innerHTML = buildTranscriptHtml(cues, { showTs, compact, highlight: term });
   };
-  const toggleBtnState = (btn: HTMLElement | null, onText: string, offText: string) => {
+  const togglePressed = (btn: HTMLElement | null) => {
     if (!btn) return;
     const pressed = btn.getAttribute('aria-pressed') === 'true';
-    const newPressed = !pressed;
-    btn.setAttribute('aria-pressed', String(newPressed));
-    btn.textContent = newPressed ? onText : offText;
+    btn.setAttribute('aria-pressed', String(!pressed));
   };
-  tsBtn?.addEventListener('click', () => { toggleBtnState(tsBtn, 'Timestamps: On', 'Timestamps: Off'); rerender(); });
-  compactBtn?.addEventListener('click', () => { toggleBtnState(compactBtn, 'Compact: On', 'Compact: Off'); rerender(); });
+  tsBtn?.addEventListener('click', () => { togglePressed(tsBtn); rerender(); });
+  compactBtn?.addEventListener('click', () => { togglePressed(compactBtn); rerender(); });
 
   // Search interaction
   const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
@@ -385,8 +382,8 @@ const init = async () => {
       const term = searchInput.value.trim();
       const container = document.getElementById('transcriptContainer') as any;
       const full = container?._fullTranscript as string | undefined;
-      const previewEl = document.getElementById('transcriptPreview');
-      if (!full || !previewEl) return;
+      const content = document.getElementById('transcriptContent');
+      if (!full || !content) return;
       // Rerender always handles highlight logic
       rerender();
     });
