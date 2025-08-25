@@ -75,15 +75,15 @@ html[data-theme='dark'] .tbtn:hover {
   outline: none;
 }
 .tbtn:focus-visible {
-  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.65);
+  box-shadow: 0 0 0 2px rgba(58, 90, 64, 0.55); /* green focus ring (#3A5A40) */
 }
 .tbtn[aria-pressed='true'] {
-  background: #fff7ed; /* orange-50 */
-  color: #ea580c; /* orange-600 */
+  background: #e4e7e1; /* subtle light green tint (near DAD7CD but cooler) */
+  color: #3a5a40; /* primary green */
 }
 html[data-theme='dark'] .tbtn[aria-pressed='true'] {
-  background: rgba(234, 88, 12, 0.22);
-  color: #fdba74; /* orange-300-ish */
+  background: rgba(52, 78, 65, 0.35); /* deeper translucent tint */
+  color: #a3b18a; /* accent green for contrast in dark */
 }
 
 /* Optional transcript font alias (currently same as body) */

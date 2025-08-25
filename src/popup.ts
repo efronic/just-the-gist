@@ -275,16 +275,19 @@ const init = async () => {
   let transcriptLoadedFlag = false;
   const setActive = (active: 'summary' | 'transcript') => {
     if (active === 'summary') {
-      tabSummaryBtn?.classList.add('tab-active');
+      tabSummaryBtn?.classList.add('tab-active', 'text-white');
       tabSummaryBtn?.setAttribute('aria-selected', 'true');
-      tabTranscriptBtn?.classList.remove('tab-active');
+      tabTranscriptBtn?.classList.remove('tab-active', 'text-white');
+      tabTranscriptBtn?.classList.add('text-slate-500');
       tabTranscriptBtn?.setAttribute('aria-selected', 'false');
       summaryTab?.classList.remove('hidden');
       transcriptPanelWrapper?.classList.add('hidden');
     } else {
-      tabSummaryBtn?.classList.remove('tab-active');
+      tabSummaryBtn?.classList.remove('tab-active', 'text-white');
+      tabSummaryBtn?.classList.add('text-slate-500');
       tabSummaryBtn?.setAttribute('aria-selected', 'false');
-      tabTranscriptBtn?.classList.add('tab-active');
+      tabTranscriptBtn?.classList.add('tab-active', 'text-white');
+      tabTranscriptBtn?.classList.remove('text-slate-500');
       tabTranscriptBtn?.setAttribute('aria-selected', 'true');
       summaryTab?.classList.add('hidden');
       transcriptPanelWrapper?.classList.remove('hidden');

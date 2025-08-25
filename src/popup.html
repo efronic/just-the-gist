@@ -9,7 +9,7 @@
   <body
     class="w-[480px] h-[620px] overflow-y-auto font-sans antialiased bg-slate-50 text-slate-800 dark:bg-base-100 dark:text-base-content"
   >
-    <header class="bg-orange-600 px-3 py-2 flex items-center justify-between shadow-sm">
+    <header class="bg-primary px-3 py-2 flex items-center justify-between shadow-sm">
       <h1 class="text-lg font-semibold tracking-tight text-white">Just the Gist</h1>
       <div class="flex items-center gap-2">
         <button
@@ -34,7 +34,7 @@
         <button
           id="openOptions"
           type="button"
-          class="btn btn-xs btn-outline border-white text-white hover:bg-white hover:text-orange-600"
+          class="btn btn-xs btn-outline border-white text-white hover:bg-white hover:text-primary"
         >
           Options
         </button>
@@ -46,11 +46,16 @@
           id="tabSummary"
           role="tab"
           aria-selected="true"
-          class="tab tab-active [--tab-bg:theme(colors.orange.600)] text-white"
+          class="tab tab-active [--tab-bg:theme(colors.primary)] text-white"
         >
           Summary
         </button>
-        <button id="tabTranscript" role="tab" aria-selected="false" class="tab text-slate-500">
+        <button
+          id="tabTranscript"
+          role="tab"
+          aria-selected="false"
+          class="tab text-slate-500 [--tab-bg:theme(colors.primary)]"
+        >
           Transcript
         </button>
       </div>
@@ -66,14 +71,14 @@
             id="apiKey"
             type="password"
             placeholder="AIza..."
-            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-orange-500 focus:ring-orange-500"
+            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
           />
           <label for="apiModel" class="block text-[11px] font-semibold mt-2 text-slate-700"
             >Model</label
           >
           <select
             id="apiModel"
-            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-orange-500 focus:ring-orange-500"
+            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
           >
             <option value="gemini-2.5-flash">gemini-2.5-flash</option>
             <option value="gemini-1.5-flash">gemini-1.5-flash</option>
@@ -83,7 +88,7 @@
           <div class="flex items-center gap-2 mt-1">
             <button
               id="saveApi"
-              class="px-3 py-1.5 rounded-md bg-orange-600 text-white text-[11px] font-semibold hover:bg-orange-700"
+              class="px-3 py-1.5 rounded-md bg-primary text-white text-[11px] font-semibold hover:bg-primary-focus"
             >
               Save API settings
             </button>
@@ -91,14 +96,14 @@
           </div>
           <div class="text-[10px] text-slate-600 break-all">
             You can also manage this in
-            <a href="#" id="openOptions2" class="text-orange-600 hover:underline">Options</a>.
+            <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
           </div>
         </div>
         <!-- URL Input with inline copy (flex group) -->
         <div>
           <label for="url" class="sr-only">URL</label>
           <div
-            class="flex items-stretch rounded-md border border-slate-300 bg-white focus-within:ring-1 focus-within:ring-orange-500 focus-within:border-orange-500"
+            class="flex items-stretch rounded-md border border-slate-300 bg-white focus-within:ring-1 focus-within:ring-primary focus-within:border-primary"
           >
             <input
               id="url"
@@ -133,7 +138,7 @@
             <label for="mode" class="text-[11px] font-medium text-slate-700">Mode</label>
             <select
               id="mode"
-              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-orange-500 focus:ring-orange-500"
+              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
             >
               <option>auto</option>
               <option>page</option>
@@ -146,7 +151,7 @@
             >
             <select
               id="detailLevelSelect"
-              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-orange-500 focus:ring-orange-500"
+              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
             >
               <option value="concise">Concise</option>
               <option value="standard" selected>Standard</option>
@@ -157,7 +162,7 @@
         </div>
         <button
           id="summarizeBtn"
-          class="w-full inline-flex items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
+          class="w-full inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-primary-focus focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           Summarize this page
         </button>
