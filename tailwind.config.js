@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import daisyui from 'daisyui';
+
 export default {
   content: ['./src/**/*.html', './src/**/*.ts', './dist/**/*.html'],
   theme: {
@@ -33,8 +35,22 @@ export default {
       },
     },
   },
-  corePlugins: {
-    preflight: false, // keep extension defaults stable
+  // Allow daisyUI preflight (keeps most resets minimal); if conflict arises revert.
+  corePlugins: {},
+  plugins: [daisyui],
+  daisyui: {
+    themes: [
+      {
+        gistlight: {
+          ...require('daisyui/src/theming/themes')['[data-theme=light]'],
+          primary: '#f97316',
+          'primary-focus': '#ea580c',
+          'primary-content': '#ffffff',
+        },
+      },
+      'dark',
+    ],
+    darkTheme: 'dark',
+    logs: false,
   },
-  plugins: [],
 };
