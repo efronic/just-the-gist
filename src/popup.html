@@ -34,7 +34,7 @@
         <button
           id="openOptions"
           type="button"
-          class="btn btn-xs btn-outline border-white text-white hover:bg-white hover:text-primary"
+          class="gbtn-outline !py-1 !px-2 !text-[11px] border border-white text-white hover:!bg-white hover:!text-[var(--color-primary)]"
         >
           Options
         </button>
@@ -86,12 +86,7 @@
             <option value="gemini-1.0-pro">gemini-1.0-pro</option>
           </select>
           <div class="flex items-center gap-2 mt-1">
-            <button
-              id="saveApi"
-              class="px-3 py-1.5 rounded-md bg-primary text-white text-[11px] font-semibold hover:bg-primary-focus"
-            >
-              Save API settings
-            </button>
+            <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">Save API settings</button>
             <span id="apiStatus" class="text-[10px] text-slate-600"></span>
           </div>
           <div class="text-[10px] text-slate-600 break-all">
@@ -160,10 +155,7 @@
             </select>
           </div>
         </div>
-        <button
-          id="summarizeBtn"
-          class="w-full inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-[12px] font-semibold text-white shadow-sm hover:bg-primary-focus focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
+        <button id="summarizeBtn" class="gbtn w-full !px-4 !py-2 !text-[12px] shadow-sm">
           Summarize this page
         </button>
         <div id="status" class="text-[10px] text-slate-600"></div>

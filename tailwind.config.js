@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import daisyui from 'daisyui';
+import { themes } from './scripts/design-tokens.mjs';
 
 export default {
   content: ['./src/**/*.html', './src/**/*.ts', './dist/**/*.html'],
@@ -43,20 +44,36 @@ export default {
       {
         gistlight: {
           ...require('daisyui/src/theming/themes')['[data-theme=light]'],
-          /* New Green Palette: DAD7CD (light), A3B18A, 588157, 3A5A40, 344E41 (deep) */
-          primary: '#3A5A40', // rich mid-dark green for primary actions
-          'primary-focus': '#344E41', // deeper green for active/focus
-          'primary-content': '#ffffff',
-          secondary: '#588157', // supporting medium green
-          'secondary-focus': '#4d734d',
-          accent: '#A3B18A', // soft accent
-          'accent-focus': '#8d9c76',
-          neutral: '#344E41', // deep green as neutral/dark base
-          'neutral-content': '#ffffff',
-          info: '#DAD7CD',
-          success: '#588157',
-          warning: '#A3B18A',
-          error: '#f43f5e',
+          primary: themes.light.primary,
+          'primary-focus': themes.light.primaryHover,
+          'primary-content': themes.light.primaryFg,
+          secondary: themes.light.secondary,
+          'secondary-focus': themes.light.secondaryHover,
+          accent: themes.light.accent,
+          'accent-focus': themes.light.accentHover,
+          neutral: themes.light.neutral,
+          'neutral-content': themes.light.neutralFg,
+          info: themes.light.info,
+          success: themes.light.success,
+          warning: themes.light.warning,
+          error: themes.light.error,
+          '--rounded-btn': '0.375rem',
+        },
+        gistalt: {
+          ...require('daisyui/src/theming/themes')['[data-theme=light]'],
+          primary: themes.alt.primary,
+          'primary-focus': themes.alt.primaryHover,
+          'primary-content': themes.alt.primaryFg,
+          secondary: themes.alt.secondary,
+          'secondary-focus': themes.alt.secondaryHover,
+          accent: themes.alt.accent,
+          'accent-focus': themes.alt.accentHover,
+          neutral: themes.alt.neutral,
+          'neutral-content': themes.alt.neutralFg,
+          info: themes.alt.info,
+          success: themes.alt.success,
+          warning: themes.alt.warning,
+          error: themes.alt.error,
           '--rounded-btn': '0.375rem',
         },
       },

@@ -1,0 +1,151 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+@use 'typography';
+@use 'components';
+@import 'auto-tokens';
+
+/* Tailwind layers (still using Tailwind utilities) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base adjustments formerly in tailwind.css */
+body,
+.font-sans {
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+}
+body {
+  font-size: 14px;
+  line-height: 1.45;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+pre,
+code {
+  font-family: theme('fontFamily.mono');
+  font-size: 12px;
+}
+
+#transcriptPreview p {
+  line-height: 1.4;
+}
+#transcriptPreview p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.gist-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.gist-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.gist-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme='dark'] body {
+  background-color: var(--color-bg);
+}
+
+/* Transcript toolbar icon button */
+.tbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  transition:
+    color 0.12s,
+    background-color 0.12s;
+  @include focus-ring();
+  &:hover {
+    color: #1e293b;
+  }
+  &[aria-pressed='true'] {
+    background: var(--color-surface-alt);
+    color: var(--color-primary);
+  }
+}
+html[data-theme='dark'] .tbtn {
+  color: #cbd5e1;
+  &:hover {
+    color: #fff;
+  }
+  &[aria-pressed='true'] {
+    background: rgba(163, 177, 138, 0.15);
+    color: var(--color-accent);
+  }
+}
+
+.font-transcript {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+html[data-theme='dark'] #transcriptToolbar {
+  background-color: rgba(40, 49, 45, 0.7);
+}
+
+/* Button component classes (example) */
+.btn-primary {
+  @include btn-base(
+    var(--color-primary),
+    var(--color-primary-hover),
+    var(--color-primary-active),
+    var(--color-primary-fg)
+  );
+}
+.btn-secondary {
+  @include btn-base(
+    var(--color-secondary),
+    var(--color-secondary-hover),
+    var(--color-secondary-active),
+    var(--color-secondary-fg)
+  );
+}
+.btn-accent {
+  @include btn-base(
+    var(--color-accent),
+    var(--color-accent-hover),
+    var(--color-accent-active),
+    var(--color-accent-fg)
+  );
+}
+.btn-outline-primary {
+  @include btn-base(
+    transparent,
+    var(--color-primary-hover),
+    var(--color-primary-active),
+    var(--color-primary)
+  );
+  @include btn-outline(var(--color-primary), var(--color-primary), var(--color-primary-fg));
+}
+
+/* Utility helpers bridging to tokens */
+.border-token {
+  border-color: var(--color-border);
+}
+.bg-surface {
+  background: var(--color-surface);
+}
+.bg-surface-alt {
+  background: var(--color-surface-alt);
+}
+.text-soft {
+  color: var(--color-text-soft);
+}
+.text-faint {
+  color: var(--color-text-faint);
+}
+
+/* Tabs override using CSS vars */
+.tabs .tab-active {
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+}

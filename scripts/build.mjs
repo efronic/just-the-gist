@@ -2,6 +2,7 @@ import { build } from 'esbuild';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { emitScssTokens } from './design-tokens.mjs';
 
 const root = path.resolve(process.cwd());
 const dist = path.join(root, 'dist');
@@ -38,16 +39,18 @@ function copyStatic() {
 }
 
 function compileTailwind() {
-  const input = path.join(root, 'src/tailwind.css');
+  // New SCSS design system entry
+  const input = path.join(root, 'src/styles/design-system.scss');
   const output = path.join(root, 'dist/tailwind.css');
-  if (!fs.existsSync(input)) return; // nothing to do if no tailwind input
+  if (!fs.existsSync(input)) return;
+  // Generate auto token file consumed by design-system.scss (optional import spot)
+  const autoTokenPath = path.join(root, 'src/styles/_auto-tokens.scss');
+  emitScssTokens(autoTokenPath, fs);
   try {
-    execSync(`npx tailwindcss -i "${input}" -o "${output}" --minify`, {
-      stdio: 'inherit',
-    });
+    execSync(`npx tailwindcss -i "${input}" -o "${output}" --minify`, { stdio: 'inherit' });
   } catch (err) {
     console.warn(
-      '[build] Tailwind CSS compile failed. Did you run npm install?\n',
+      '[build] Tailwind (SCSS) compile failed. Did you run npm install?\n',
       err?.message || err
     );
   }
@@ -58,17 +61,14 @@ function emitManifestForDist() {
   if (!fs.existsSync(manifestPath)) return;
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 
-  const stripDist = (p) =>
-    typeof p === 'string' ? p.replace(/^dist\//, '') : p;
+  const stripDist = (p) => (typeof p === 'string' ? p.replace(/^dist\//, '') : p);
 
   // Adjust paths because manifest will live inside dist/
   if (manifest.action?.default_popup) {
     manifest.action.default_popup = stripDist(manifest.action.default_popup);
   }
   if (manifest.background?.service_worker) {
-    manifest.background.service_worker = stripDist(
-      manifest.background.service_worker
-    );
+    manifest.background.service_worker = stripDist(manifest.background.service_worker);
   }
   if (manifest.options_page) {
     manifest.options_page = stripDist(manifest.options_page);
@@ -80,10 +80,7 @@ function emitManifestForDist() {
   }
 
   // Icons are copied as-is into dist/icons and paths remain the same
-  fs.writeFileSync(
-    path.join(dist, 'manifest.json'),
-    JSON.stringify(manifest, null, 2)
-  );
+  fs.writeFileSync(path.join(dist, 'manifest.json'), JSON.stringify(manifest, null, 2));
 }
 
 async function main() {

@@ -1,0 +1,165 @@
+// Design System Tokens
+// Color palette (light & dark variants)
+// Base palette values from green system: DAD7CD, A3B18A, 588157, 3A5A40, 344E41
+
+// Raw palette
+$color-green-50: #f0f1ee;
+$color-green-100: #e4e7e1; // light tint used for pressed states
+$color-green-200: #dad7cd; // info / subtle bg
+$color-green-300: #a3b18a; // accent
+$color-green-400: #79966d; // generated intermediate
+$color-green-500: #588157; // secondary / success
+$color-green-600: #4d734d; // secondary-focus
+$color-green-650: #456643; // custom mid
+$color-green-700: #3a5a40; // primary
+$color-green-800: #344e41; // primary-focus / neutral
+$color-green-900: #283b32; // deeper dark
+
+// Semantic roles (LIGHT THEME)
+$color-primary: $color-green-700;
+$color-primary-hover: $color-green-800;
+$color-primary-active: $color-green-800;
+$color-primary-fg: #ffffff;
+
+$color-secondary: $color-green-500;
+$color-secondary-hover: $color-green-600;
+$color-secondary-active: $color-green-650;
+$color-secondary-fg: #ffffff;
+
+$color-accent: $color-green-300;
+$color-accent-hover: $color-green-400;
+$color-accent-active: $color-green-500;
+$color-accent-fg: #1e2a23;
+
+$color-neutral: $color-green-800;
+$color-neutral-hover: $color-green-900;
+$color-neutral-active: $color-green-900;
+$color-neutral-fg: #ffffff;
+
+$color-bg: #ffffff;
+$color-bg-alt: #f7f8f6;
+$color-surface: #ffffff;
+$color-surface-alt: #f0f1ee;
+$color-border: #d5dad6;
+$color-border-strong: #b9c1ba;
+
+$color-text: #1f2722;
+$color-text-soft: #4a5a50;
+$color-text-faint: #6b7a71;
+
+$color-focus-ring: rgba(58, 90, 64, 0.55);
+
+// Feedback
+$color-info: $color-green-200;
+$color-success: $color-green-500;
+$color-warning: #e7c96a; // derived warm accent
+$color-error: #f43f5e;
+
+// Dark theme counterparts
+$dark-color-bg: #1e2421;
+$dark-color-bg-alt: #242c28;
+$dark-color-surface: #28312d;
+$dark-color-surface-alt: #2f3a35;
+$dark-color-border: #3c4943;
+$dark-color-border-strong: #4a5952;
+$dark-color-text: #eef2ef;
+$dark-color-text-soft: #c7d0cb;
+$dark-color-text-faint: #9eaaa4;
+$dark-color-primary: $color-green-700;
+$dark-color-primary-hover: $color-green-600;
+$dark-color-primary-active: $color-green-600;
+$dark-color-primary-fg: #ffffff;
+$dark-color-secondary: $color-green-500;
+$dark-color-secondary-hover: $color-green-400;
+$dark-color-secondary-active: $color-green-300;
+$dark-color-secondary-fg: #ffffff;
+$dark-color-accent: $color-green-300;
+$dark-color-accent-hover: $color-green-400;
+$dark-color-accent-active: $color-green-500;
+$dark-color-accent-fg: #1e2a23;
+$dark-color-neutral: $color-green-800;
+$dark-color-neutral-hover: $color-green-700;
+$dark-color-neutral-active: $color-green-700;
+$dark-color-neutral-fg: #ffffff;
+$dark-color-focus-ring: rgba(163, 177, 138, 0.55);
+
+// Elevation / shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md:
+  0 2px 4px -1px rgba(0, 0, 0, 0.1),
+  0 4px 6px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 4px 10px -2px rgba(0, 0, 0, 0.18);
+
+// Radii
+$radius-sm: 2px;
+$radius-md: 6px;
+$radius-lg: 10px;
+
+// Spacing scale (partial)
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-6: 1.5rem;
+$space-8: 2rem;
+
+// Z-index layer tokens
+$z-toolbar: 10;
+$z-overlay: 1000;
+
+// Export as CSS custom properties to layer atop Tailwind utilities
+:root {
+  --color-primary: #{$color-primary};
+  --color-primary-hover: #{$color-primary-hover};
+  --color-primary-active: #{$color-primary-active};
+  --color-primary-fg: #{$color-primary-fg};
+  --color-secondary: #{$color-secondary};
+  --color-secondary-hover: #{$color-secondary-hover};
+  --color-secondary-active: #{$color-secondary-active};
+  --color-secondary-fg: #{$color-secondary-fg};
+  --color-accent: #{$color-accent};
+  --color-accent-hover: #{$color-accent-hover};
+  --color-accent-active: #{$color-accent-active};
+  --color-accent-fg: #{$color-accent-fg};
+  --color-bg: #{$color-bg};
+  --color-bg-alt: #{$color-bg-alt};
+  --color-surface: #{$color-surface};
+  --color-surface-alt: #{$color-surface-alt};
+  --color-border: #{$color-border};
+  --color-border-strong: #{$color-border-strong};
+  --color-text: #{$color-text};
+  --color-text-soft: #{$color-text-soft};
+  --color-text-faint: #{$color-text-faint};
+  --color-focus-ring: #{$color-focus-ring};
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+}
+
+[data-theme='dark'] {
+  --color-primary: #{$dark-color-primary};
+  --color-primary-hover: #{$dark-color-primary-hover};
+  --color-primary-active: #{$dark-color-primary-active};
+  --color-primary-fg: #{$dark-color-primary-fg};
+  --color-secondary: #{$dark-color-secondary};
+  --color-secondary-hover: #{$dark-color-secondary-hover};
+  --color-secondary-active: #{$dark-color-secondary-active};
+  --color-secondary-fg: #{$dark-color-secondary-fg};
+  --color-accent: #{$dark-color-accent};
+  --color-accent-hover: #{$dark-color-accent-hover};
+  --color-accent-active: #{$dark-color-accent-active};
+  --color-accent-fg: #{$dark-color-accent-fg};
+  --color-bg: #{$dark-color-bg};
+  --color-bg-alt: #{$dark-color-bg-alt};
+  --color-surface: #{$dark-color-surface};
+  --color-surface-alt: #{$dark-color-surface-alt};
+  --color-border: #{$dark-color-border};
+  --color-border-strong: #{$dark-color-border-strong};
+  --color-text: #{$dark-color-text};
+  --color-text-soft: #{$dark-color-text-soft};
+  --color-text-faint: #{$dark-color-text-faint};
+  --color-focus-ring: #{$dark-color-focus-ring};
+}
