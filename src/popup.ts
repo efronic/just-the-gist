@@ -117,9 +117,11 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
       return;
     }
     const fullText = entry.cues.map(c => c.text).join(' ');
-    // Render as rich paragraphs
-    const showTs = (document.getElementById('transcriptShowTs') as HTMLInputElement | null)?.checked ?? true;
-    const compact = (document.getElementById('transcriptCompact') as HTMLInputElement | null)?.checked ?? false;
+    // Render as rich paragraphs using button toggle state (aria-pressed)
+    const showTsBtn = document.getElementById('transcriptShowTsToggle');
+    const compactBtn = document.getElementById('transcriptCompactToggle');
+    const showTs = showTsBtn ? showTsBtn.getAttribute('aria-pressed') !== 'false' : true;
+    const compact = compactBtn ? compactBtn.getAttribute('aria-pressed') === 'true' : false;
     (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(entry.cues, { showTs, compact });
     metaEl.textContent = `Language: ${entry.lang || 'unknown'} • Cues: ${entry.cues.length}${entry.truncated ? ' • (truncated at capture)' : ''}`;
     container.classList.remove('hidden');
@@ -133,10 +135,15 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     const expanded = !!EXPANDED_TRANSCRIPTS[vid];
     const toggleBtn = document.getElementById('toggleTranscript');
     if (expanded) {
-      previewEl.classList.remove('max-h-32');
-      previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
+      // Expanded state: allow more vertical space (initial preview starts with max-h-[420px])
+      previewEl.classList.remove('max-h-[420px]');
+      previewEl.classList.add('max-h-[800px]', 'overflow-y-auto');
       toggleBtn && toggleBtn.setAttribute('data-expanded', 'true');
       if (toggleBtn) toggleBtn.textContent = 'Collapse';
+    } else {
+      // Ensure collapsed baseline classes present
+      previewEl.classList.remove('max-h-[800px]');
+      if (!previewEl.classList.contains('max-h-[420px]')) previewEl.classList.add('max-h-[420px]');
     }
   } catch { /* ignore */ }
 };
@@ -332,37 +339,44 @@ const init = async () => {
     const full = container?._fullTranscript as string | undefined;
     if (!previewEl || !full) return;
     if (!expanded) {
-      previewEl.classList.remove('max-h-32');
-      previewEl.classList.add('max-h-[600px]', 'overflow-y-auto');
+      previewEl.classList.remove('max-h-[420px]');
+      previewEl.classList.add('max-h-[800px]', 'overflow-y-auto');
       btnToggle.textContent = 'Collapse';
       btnToggle.setAttribute('data-expanded', 'true');
       persistExpandState(container?._videoId, true);
     } else {
-      // Collapse: keep full text but restrict height (scroll remains available)
-      previewEl.classList.remove('max-h-[600px]');
-      previewEl.classList.add('max-h-32');
+      // Collapse: revert to initial preview height
+      previewEl.classList.remove('max-h-[800px]');
+      previewEl.classList.add('max-h-[420px]');
       btnToggle.textContent = 'Expand';
       btnToggle.setAttribute('data-expanded', 'false');
       persistExpandState(container?._videoId, false);
     }
   });
 
-  // Timestamps & compact toggles
-  const tsCheckbox = document.getElementById('transcriptShowTs') as HTMLInputElement | null;
-  const compactCheckbox = document.getElementById('transcriptCompact') as HTMLInputElement | null;
+  // Timestamps & compact toggle buttons (aria-pressed state)
+  const tsBtn = document.getElementById('transcriptShowTsToggle');
+  const compactBtn = document.getElementById('transcriptCompactToggle');
   const rerender = () => {
     const container = document.getElementById('transcriptContainer') as any;
     const previewEl = document.getElementById('transcriptPreview');
     const cues = container?._cues as StoredTranscript['cues'] | undefined;
     if (!cues || !previewEl) return;
-    const showTs = tsCheckbox?.checked ?? true;
-    const compact = compactCheckbox?.checked ?? false;
+    const showTs = tsBtn ? tsBtn.getAttribute('aria-pressed') !== 'false' : true;
+    const compact = compactBtn ? compactBtn.getAttribute('aria-pressed') === 'true' : false;
     const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
     const term = searchInput?.value.trim();
     (previewEl as HTMLElement).innerHTML = buildTranscriptHtml(cues, { showTs, compact, highlight: term });
   };
-  tsCheckbox?.addEventListener('change', rerender);
-  compactCheckbox?.addEventListener('change', rerender);
+  const toggleBtnState = (btn: HTMLElement | null, onText: string, offText: string) => {
+    if (!btn) return;
+    const pressed = btn.getAttribute('aria-pressed') === 'true';
+    const newPressed = !pressed;
+    btn.setAttribute('aria-pressed', String(newPressed));
+    btn.textContent = newPressed ? onText : offText;
+  };
+  tsBtn?.addEventListener('click', () => { toggleBtnState(tsBtn, 'Timestamps: On', 'Timestamps: Off'); rerender(); });
+  compactBtn?.addEventListener('click', () => { toggleBtnState(compactBtn, 'Compact: On', 'Compact: Off'); rerender(); });
 
   // Search interaction
   const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
@@ -373,10 +387,26 @@ const init = async () => {
       const full = container?._fullTranscript as string | undefined;
       const previewEl = document.getElementById('transcriptPreview');
       if (!full || !previewEl) return;
-      if (!term) { rerender(); return; }
+      // Rerender always handles highlight logic
       rerender();
     });
   }
+
+  // Theme toggle
+  const { THEME } = await chrome.storage.sync.get({ THEME: 'gistlight' });
+  const applyTheme = (t: string) => {
+    document.documentElement.setAttribute('data-theme', t);
+  };
+  applyTheme(THEME);
+  const themeToggleBtn = document.getElementById('themeToggle');
+  themeToggleBtn?.addEventListener('click', async () => {
+    try {
+      const current = document.documentElement.getAttribute('data-theme') || 'gistlight';
+      const next = current === 'gistlight' ? 'dark' : 'gistlight';
+      applyTheme(next);
+      await chrome.storage.sync.set({ THEME: next });
+    } catch {/* ignore */ }
+  });
 };
 
 // --- Utility functions ---

@@ -30,3 +30,19 @@ code {
 #transcriptPreview p:last-child {
   margin-bottom: 0 !important;
 }
+
+/* Custom scrollbar for popup scrollable regions */
+.gist-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.gist-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.gist-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme='dark'] body {
+  background-color: theme('colors.base-300', #1f2937);
+}
