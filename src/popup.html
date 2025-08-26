@@ -41,292 +41,302 @@
       </div>
     </header>
     <nav class="mt-2 px-3">
-      <div role="tablist" class="tabs tabs-lifted w-full text-[12px] font-medium">
-        <button
+      <div class="tabs tabs-lifted w-full text-[12px] font-medium">
+        <input
+          type="radio"
+          name="popup_tabs"
           id="tabSummary"
-          role="tab"
-          aria-selected="true"
-          class="tab tab-active [--tab-bg:theme(colors.primary)] text-white"
+          aria-label="Summary"
+          class="tab"
+          checked
+        />
+        <div
+          id="summaryTabPanel"
+          role="tabpanel"
+          class="tab-content bg-base-100 p-0"
         >
-          Summary
-        </button>
-        <button
-          id="tabTranscript"
-          role="tab"
-          aria-selected="false"
-          class="tab text-slate-500 [--tab-bg:theme(colors.primary)]"
-        >
-          Transcript
-        </button>
-      </div>
-    </nav>
-    <main class="px-4 pb-6 space-y-6">
-      <!-- Summary Tab Content -->
-      <div id="summaryTab" role="tabpanel" class="space-y-5">
-        <div id="apiSection" class="space-y-2" style="display: none">
-          <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-slate-700"
-            >Google Gemini API key</label
-          >
-          <input
-            id="apiKey"
-            type="password"
-            placeholder="AIza..."
-            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
-          />
-          <label for="apiModel" class="block text-[11px] font-semibold mt-2 text-slate-700"
-            >Model</label
-          >
-          <select
-            id="apiModel"
-            class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
-          >
-            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-            <option value="gemini-1.0-pro">gemini-1.0-pro</option>
-          </select>
-          <div class="flex items-center gap-2 mt-1">
-            <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">Save API settings</button>
-            <span id="apiStatus" class="text-[10px] text-slate-600"></span>
-          </div>
-          <div class="text-[10px] text-slate-600 break-all">
-            You can also manage this in
-            <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
-          </div>
-        </div>
-        <!-- URL Input with inline copy (flex group) -->
-        <div>
-          <label for="url" class="sr-only">URL</label>
-          <div
-            class="flex items-stretch rounded-md border border-slate-300 bg-white focus-within:ring-1 focus-within:ring-primary focus-within:border-primary"
-          >
-            <input
-              id="url"
-              type="text"
-              value=""
-              readonly
-              class="flex-1 bg-transparent border-0 px-3 py-2 text-[11px] text-slate-700 focus:outline-none focus:ring-0"
-            />
-            <button
-              id="copyUrl"
-              type="button"
-              aria-label="Copy URL"
-              class="px-2 border-l border-slate-300 text-slate-500 hover:text-slate-800 focus:outline-none flex items-center"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                class="w-4 h-4"
+          <div id="summaryTab" class="px-1 pt-4 pb-2 space-y-5">
+            <!-- Summary Tab Content -->
+            <div id="apiSection" class="space-y-2" style="display: none">
+              <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-slate-700"
+                >Google Gemini API key</label
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <!-- Controls -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1">
-            <label for="mode" class="text-[11px] font-medium text-slate-700">Mode</label>
-            <select
-              id="mode"
-              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
-            >
-              <option>auto</option>
-              <option>page</option>
-              <option>video</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
-            <label for="detailLevelSelect" class="text-[11px] font-medium text-slate-700"
-              >Detail</label
-            >
-            <select
-              id="detailLevelSelect"
-              class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
-            >
-              <option value="concise">Concise</option>
-              <option value="standard" selected>Standard</option>
-              <option value="detailed">Detailed</option>
-              <option value="expanded">Expanded</option>
-            </select>
-          </div>
-        </div>
-        <button id="summarizeBtn" class="gbtn w-full !px-4 !py-2 !text-[12px] shadow-sm">
-          Summarize this page
-        </button>
-        <div id="status" class="text-[10px] text-slate-600"></div>
-        <pre
-          id="output"
-          class="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
-        ></pre>
-      </div>
-      <!-- Transcript Tab Content -->
-      <div id="transcriptTabPanel" role="tabpanel" class="space-y-3 hidden">
-        <section id="transcriptContainer" class="space-y-3 hidden">
-          <div
-            id="transcriptPreview"
-            class="relative max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-base-100 pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
-          >
-            <div
-              id="transcriptToolbar"
-              class="sticky -top-px left-0 right-0 z-10 flex items-center gap-2 px-2 py-1.5 backdrop-blur-md bg-base-100/70 border-b border-slate-200 rounded-t-md"
-            >
-              <button
-                id="tbCopy"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Copy"
-                aria-label="Copy transcript"
+              <input
+                id="apiKey"
+                type="password"
+                placeholder="AIza..."
+                class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
+              />
+              <label for="apiModel" class="block text-[11px] font-semibold mt-2 text-slate-700"
+                >Model</label
               >
-                <span class="sr-only">Copy transcript</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <path
-                    d="M6 11c0-2.828 0-4.243.879-5.121C7.757 5 9.172 5 12 5h3c2.828 0 4.243 0 5.121.879C21 6.757 21 8.172 21 11v5c0 2.828 0 4.243-.879 5.121C19.243 22 17.828 22 15 22h-3c-2.828 0-4.243 0-5.121-.879C6 20.243 6 18.828 6 16v-5Z"
-                  />
-                  <path
-                    d="M6 19c-1.657 0-3-1.343-3-3v-6c0-3.771 0-5.657 1.172-6.828C5.343 2 7.229 2 11 2h4c1.657 0 3 1.343 3 3"
-                  />
-                </svg>
-              </button>
-              <button
-                id="tbCopyTs"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Copy +TS"
-                aria-label="Copy with timestamps"
+              <select
+                id="apiModel"
+                class="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
               >
-                <span class="sr-only">Copy with timestamps</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M22 11.1V6.9C22 3.4 20.6 2 17.1 2h-4.2C9.4 2 8 3.4 8 6.9V8h3.1c3.5 0 4.9 1.4 4.9 4.9V16h1.1c3.5 0 4.9-1.4 4.9-4.9Z"
-                  />
-                  <path
-                    d="M16 17.1v-4.2c0-3.5-1.4-4.9-4.9-4.9H6.9C3.4 8 2 9.4 2 12.9v4.2C2 20.6 3.4 22 6.9 22h4.2c3.5 0 4.9-1.4 4.9-4.9Z"
-                  />
-                  <path d="M6.08 15 8.03 16.95 11.92 13.05" />
-                </svg>
-              </button>
-              <button
-                id="tbDownload"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Download"
-                aria-label="Download transcript"
-              >
-                <span class="sr-only">Download transcript</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path
-                    d="M17 9c2.175.012 3.353.109 4.121.878C22 10.757 22 12.172 22 15v1c0 2.829 0 4.243-.879 5.122C20.243 22 18.828 22 16 22H8c-2.828 0-4.243 0-5.122-.878C2 20.243 2 18.829 2 16v-1c0-2.828 0-4.243.879-5.122C3.647 9.11 4.825 9.012 7 9"
-                  />
-                  <path d="M12 2v13m0 0L9 11.5M12 15l3-3.5" />
-                </svg>
-              </button>
-              <button
-                id="tbExpand"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Expand"
-                aria-label="Expand transcript"
-                aria-pressed="false"
-              >
-                <span class="sr-only">Expand transcript</span>
-                <svg
-                  viewBox="0 0 24 24"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M15 9 21 3h-6v6Zm-6 0V3H3l6 6Zm0 6-6 6h6v-6Zm6 0v6h6l-6-6Z" />
-                </svg>
-              </button>
-              <button
-                id="tbToggleTs"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Timestamps"
-                aria-pressed="true"
-                aria-label="Toggle timestamps"
-              >
-                <span class="sr-only">Toggle timestamps</span>
-                <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
-                  <path d="M3.5 7.5A1.5 1.5 0 1 0 3.5 4.5a1.5 1.5 0 0 0 0 3Z" />
-                  <path d="M8 5a1 1 0 0 0 0 2h13a1 1 0 1 0 0-2H8Z" />
-                  <path d="M8 11a1 1 0 0 0 0 2h13a1 1 0 1 0 0-2H8Z" />
-                  <path d="M7 18a1 1 0 0 1 1-1h13a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" />
-                  <path d="M5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-                  <path d="M3.5 19.5A1.5 1.5 0 1 0 3.5 16.5a1.5 1.5 0 0 0 0 3Z" />
-                </svg>
-              </button>
-              <button
-                id="tbCompact"
-                class="tbtn tooltip tooltip-bottom"
-                data-tip="Compact"
-                aria-pressed="false"
-                aria-label="Compact mode"
-              >
-                <span class="sr-only">Compact mode</span>
-                <svg
-                  viewBox="0 0 64 64"
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linejoin="bevel"
-                  stroke-miterlimit="10"
-                >
-                  <polyline points="25,19 32,26 39,19" />
-                  <line x1="32" y1="26" x2="32" y2="0" />
-                  <polyline points="39,45 32,38 25,45" />
-                  <line x1="32" y1="38" x2="32" y2="64" />
-                </svg>
-              </button>
-              <div
-                id="transcriptMetaMini"
-                class="hidden md:block text-[10px] text-slate-500 whitespace-nowrap"
-              ></div>
-              <div class="relative ml-auto min-w-[140px] w-full max-w-[50%]">
-                <label for="transcriptSearch" class="sr-only">Search transcript</label>
-                <input
-                  id="transcriptSearch"
-                  type="search"
-                  placeholder="Search…"
-                  class="input input-xs input-bordered w-full"
-                />
+                <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                <option value="gemini-1.0-pro">gemini-1.0-pro</option>
+              </select>
+              <div class="flex items-center gap-2 mt-1">
+                <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">
+                  Save API settings
+                </button>
+                <span id="apiStatus" class="text-[10px] text-slate-600"></span>
+              </div>
+              <div class="text-[10px] text-slate-600 break-all">
+                You can also manage this in
+                <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
               </div>
             </div>
-            <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+            <!-- URL Input with inline copy (flex group) -->
+            <div>
+              <label for="url" class="sr-only">URL</label>
+              <div
+                class="flex items-stretch rounded-md border border-slate-300 bg-white focus-within:ring-1 focus-within:ring-primary focus-within:border-primary"
+              >
+                <input
+                  id="url"
+                  type="text"
+                  value=""
+                  readonly
+                  class="flex-1 bg-transparent border-0 px-3 py-2 text-[11px] text-slate-700 focus:outline-none focus:ring-0"
+                />
+                <button
+                  id="copyUrl"
+                  type="button"
+                  aria-label="Copy URL"
+                  class="px-2 border-l border-slate-300 text-slate-500 hover:text-slate-800 focus:outline-none flex items-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="w-4 h-4"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <!-- Controls -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1">
+                <label for="mode" class="text-[11px] font-medium text-slate-700">Mode</label>
+                <select
+                  id="mode"
+                  class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
+                >
+                  <option>auto</option>
+                  <option>page</option>
+                  <option>video</option>
+                </select>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="detailLevelSelect" class="text-[11px] font-medium text-slate-700"
+                  >Detail</label
+                >
+                <select
+                  id="detailLevelSelect"
+                  class="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-[11px] focus:border-primary focus:ring-primary"
+                >
+                  <option value="concise">Concise</option>
+                  <option value="standard" selected>Standard</option>
+                  <option value="detailed">Detailed</option>
+                  <option value="expanded">Expanded</option>
+                </select>
+              </div>
+            </div>
+            <button id="summarizeBtn" class="gbtn w-full !px-4 !py-2 !text-[12px] shadow-sm">
+              Summarize this page
+            </button>
+            <div id="status" class="text-[10px] text-slate-600"></div>
+            <pre
+              id="output"
+              class="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
+            ></pre>
           </div>
-          <div id="transcriptMeta" class="text-[11px] text-slate-500"></div>
-        </section>
-        <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">
-          No transcript available for this page/video.
+        </div>
+        <input
+          type="radio"
+          name="popup_tabs"
+          id="tabTranscript"
+          aria-label="Transcript"
+          class="tab"
+        />
+        <div
+          id="transcriptTabPanel"
+          role="tabpanel"
+          class="tab-content bg-base-100 p-0 space-y-3 hidden"
+        >
+          <!-- Transcript Tab Content -->
+          <section id="transcriptContainer" class="space-y-3 hidden">
+            <div
+              id="transcriptPreview"
+              class="relative max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-base-100 pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
+            >
+              <div
+                id="transcriptToolbar"
+                class="sticky -top-px left-0 right-0 z-10 flex items-center gap-2 px-2 py-1.5 backdrop-blur-md bg-base-100/70 border-b border-slate-200"
+              >
+                <button
+                  id="tbCopy"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Copy"
+                  aria-label="Copy transcript"
+                >
+                  <span class="sr-only">Copy transcript</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  >
+                    <path
+                      d="M6 11c0-2.828 0-4.243.879-5.121C7.757 5 9.172 5 12 5h3c2.828 0 4.243 0 5.121.879C21 6.757 21 8.172 21 11v5c0 2.828 0 4.243-.879 5.121C19.243 22 17.828 22 15 22h-3c-2.828 0-4.243 0-5.121-.879C6 20.243 6 18.828 6 16v-5Z"
+                    />
+                    <path
+                      d="M6 19c-1.657 0-3-1.343-3-3v-6c0-3.771 0-5.657 1.172-6.828C5.343 2 7.229 2 11 2h4c1.657 0 3 1.343 3 3"
+                    />
+                  </svg>
+                </button>
+                <button
+                  id="tbCopyTs"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Copy +TS"
+                  aria-label="Copy with timestamps"
+                >
+                  <span class="sr-only">Copy with timestamps</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M22 11.1V6.9C22 3.4 20.6 2 17.1 2h-4.2C9.4 2 8 3.4 8 6.9V8h3.1c3.5 0 4.9 1.4 4.9 4.9V16h1.1c3.5 0 4.9-1.4 4.9-4.9Z"
+                    />
+                    <path
+                      d="M16 17.1v-4.2c0-3.5-1.4-4.9-4.9-4.9H6.9C3.4 8 2 9.4 2 12.9v4.2C2 20.6 3.4 22 6.9 22h4.2c3.5 0 4.9-1.4 4.9-4.9Z"
+                    />
+                    <path d="M6.08 15 8.03 16.95 11.92 13.05" />
+                  </svg>
+                </button>
+                <button
+                  id="tbDownload"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Download"
+                  aria-label="Download transcript"
+                >
+                  <span class="sr-only">Download transcript</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17 9c2.175.012 3.353.109 4.121.878C22 10.757 22 12.172 22 15v1c0 2.829 0 4.243-.879 5.122C20.243 22 18.828 22 16 22H8c-2.828 0-4.243 0-5.122-.878C2 20.243 2 18.829 2 16v-1c0-2.828 0-4.243.879-5.122C3.647 9.11 4.825 9.012 7 9"
+                    />
+                    <path d="M12 2v13m0 0L9 11.5M12 15l3-3.5" />
+                  </svg>
+                </button>
+                <button
+                  id="tbExpand"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Expand"
+                  aria-label="Expand transcript"
+                  aria-pressed="false"
+                >
+                  <span class="sr-only">Expand transcript</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M15 9 21 3h-6v6Zm-6 0V3H3l6 6Zm0 6-6 6h6v-6Zm6 0v6h6l-6-6Z" />
+                  </svg>
+                </button>
+                <button
+                  id="tbToggleTs"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Timestamps"
+                  aria-pressed="true"
+                  aria-label="Toggle timestamps"
+                >
+                  <span class="sr-only">Toggle timestamps</span>
+                  <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor">
+                    <path d="M3.5 7.5A1.5 1.5 0 1 0 3.5 4.5a1.5 1.5 0 0 0 0 3Z" />
+                    <path d="M8 5a1 1 0 0 0 0 2h13a1 1 0 1 0 0-2H8Z" />
+                    <path d="M8 11a1 1 0 0 0 0 2h13a1 1 0 1 0 0-2H8Z" />
+                    <path d="M7 18a1 1 0 0 1 1-1h13a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Z" />
+                    <path d="M5 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                    <path d="M3.5 19.5A1.5 1.5 0 1 0 3.5 16.5a1.5 1.5 0 0 0 0 3Z" />
+                  </svg>
+                </button>
+                <button
+                  id="tbCompact"
+                  class="tbtn tooltip tooltip-bottom"
+                  data-tip="Compact"
+                  aria-pressed="false"
+                  aria-label="Compact mode"
+                >
+                  <span class="sr-only">Compact mode</span>
+                  <svg
+                    viewBox="0 0 64 64"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linejoin="bevel"
+                    stroke-miterlimit="10"
+                  >
+                    <polyline points="25,19 32,26 39,19" />
+                    <line x1="32" y1="26" x2="32" y2="0" />
+                    <polyline points="39,45 32,38 25,45" />
+                    <line x1="32" y1="38" x2="32" y2="64" />
+                  </svg>
+                </button>
+                <div
+                  id="transcriptMetaMini"
+                  class="hidden md:block text-[10px] text-slate-500 whitespace-nowrap"
+                ></div>
+                <div class="relative ml-auto min-w-[140px] w-full max-w-[50%]">
+                  <label for="transcriptSearch" class="sr-only">Search transcript</label>
+                  <input
+                    id="transcriptSearch"
+                    type="search"
+                    placeholder="Search…"
+                    class="input input-xs input-bordered w-full"
+                  />
+                </div>
+              </div>
+              <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+            </div>
+            <div id="transcriptMeta" class="text-[11px] text-slate-500"></div>
+          </section>
+          <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">
+            No transcript available for this page/video.
+          </div>
         </div>
       </div>
-    </main>
+    </nav>
+    <main class="px-4 pb-6 space-y-6"></main>
     <script type="module" src="popup.js"></script>
   </body>
 </html>

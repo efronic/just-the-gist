@@ -267,35 +267,24 @@ const init = async () => {
       btn.disabled = false;
     }
   });
-  // Tabs setup
-  const tabSummaryBtn = document.getElementById('tabSummary');
-  const tabTranscriptBtn = document.getElementById('tabTranscript');
-  const summaryTab = document.getElementById('summaryTab');
-  const transcriptPanelWrapper = document.getElementById('transcriptTabPanel');
+  // Tabs setup (radio-based DaisyUI tabs)
+  const summaryRadio = document.getElementById('tabSummary') as HTMLInputElement | null;
+  const transcriptRadio = document.getElementById('tabTranscript') as HTMLInputElement | null;
+  const summaryPanel = document.getElementById('summaryTabPanel');
+  const transcriptPanel = document.getElementById('transcriptTabPanel');
   let transcriptLoadedFlag = false;
-  const setActive = (active: 'summary' | 'transcript') => {
-    if (active === 'summary') {
-      tabSummaryBtn?.classList.add('tab-active', 'text-white');
-      tabSummaryBtn?.setAttribute('aria-selected', 'true');
-      tabTranscriptBtn?.classList.remove('tab-active', 'text-white');
-      tabTranscriptBtn?.classList.add('text-slate-500');
-      tabTranscriptBtn?.setAttribute('aria-selected', 'false');
-      summaryTab?.classList.remove('hidden');
-      transcriptPanelWrapper?.classList.add('hidden');
+  const refreshVisibility = () => {
+    const showSummary = summaryRadio?.checked;
+    if (showSummary) {
+      summaryPanel?.classList.remove('hidden');
+      transcriptPanel?.classList.add('hidden');
     } else {
-      tabSummaryBtn?.classList.remove('tab-active', 'text-white');
-      tabSummaryBtn?.classList.add('text-slate-500');
-      tabSummaryBtn?.setAttribute('aria-selected', 'false');
-      tabTranscriptBtn?.classList.add('tab-active', 'text-white');
-      tabTranscriptBtn?.classList.remove('text-slate-500');
-      tabTranscriptBtn?.setAttribute('aria-selected', 'true');
-      summaryTab?.classList.add('hidden');
-      transcriptPanelWrapper?.classList.remove('hidden');
+      summaryPanel?.classList.add('hidden');
+      transcriptPanel?.classList.remove('hidden');
     }
   };
-  const activateTab = async (name: 'summary' | 'transcript') => {
-    setActive(name);
-    if (name === 'transcript' && !transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
+  const maybeLoadTranscript = async () => {
+    if (transcriptRadio?.checked && !transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
       await loadTranscriptIntoPopup(tab?.url);
       transcriptLoadedFlag = true;
       const container = document.getElementById('transcriptContainer');
@@ -303,10 +292,10 @@ const init = async () => {
       if (container && container.classList.contains('hidden') && noMsg) noMsg.classList.remove('hidden');
     }
   };
-  tabSummaryBtn?.addEventListener('click', () => activateTab('summary'));
-  tabTranscriptBtn?.addEventListener('click', () => activateTab('transcript'));
-  // Default to summary tab
-  await activateTab('summary');
+  summaryRadio?.addEventListener('change', () => { refreshVisibility(); });
+  transcriptRadio?.addEventListener('change', () => { refreshVisibility(); maybeLoadTranscript(); });
+  // Initial state
+  refreshVisibility();
 
   // Button actions
   document.getElementById('tbCopy')?.addEventListener('click', () => {
