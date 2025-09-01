@@ -130,55 +130,13 @@ html[data-theme='dark'] #transcriptToolbar {
   background-color: rgba(40, 49, 45, 0.7);
 }
 
-/* Button component classes (example) */
-.btn-primary {
-  @include btn-base(
-    var(--color-primary),
-    var(--color-primary-hover),
-    var(--color-primary-active),
-    var(--color-primary-fg)
-  );
-}
-.btn-secondary {
-  @include btn-base(
-    var(--color-secondary),
-    var(--color-secondary-hover),
-    var(--color-secondary-active),
-    var(--color-secondary-fg)
-  );
-}
-.btn-accent {
-  @include btn-base(
-    var(--color-accent),
-    var(--color-accent-hover),
-    var(--color-accent-active),
-    var(--color-accent-fg)
-  );
-}
-.btn-outline-primary {
-  @include btn-base(
-    transparent,
-    var(--color-primary-hover),
-    var(--color-primary-active),
-    var(--color-primary)
-  );
-  @include btn-outline(var(--color-primary), var(--color-primary), var(--color-primary-fg));
-}
-
-/* Summarize button: moved back here because build pipeline compiles ONLY this SCSS file
-   (scripts/build.mjs -> compileTailwind input = src/styles/design-system.scss) into dist/tailwind.css.
-   The old definition that still lives in src/tailwind.css is not part of the build output, so after
-   we removed this block earlier the class lost its styling. Keeping a single source of truth here. */
-.summarize-btn {
-  @include btn-base(
-    var(--color-primary),
-    var(--color-primary-hover),
-    var(--color-primary-active),
-    var(--color-primary-fg)
-  );
-  font-weight: 600;
-  letter-spacing: 0.25px;
-  box-shadow: var(--shadow-sm);
+/* DaisyUI provides button variants; map legacy classes to DaisyUI equivalents for backwards compatibility. */
+@layer components {
+  /* Avoid aliasing built-in DaisyUI "btn" variants back onto same names (can cause @apply recursion).
+     Only keep legacy summarize-btn mapping. */
+  .summarize-btn {
+    @apply btn btn-primary font-semibold tracking-tight text-[12px] px-4 py-2 shadow-sm;
+  }
 }
 
 /* Utility helpers bridging to tokens */
