@@ -1,3 +1,5 @@
+/* Roboto variable font import (weight+ital axes) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @use 'tokens' as *;
 @use 'mixins' as *;
 @use 'typography';
@@ -23,6 +25,15 @@ body {
   color: var(--color-text);
 }
 
+/* Ensure all basic form inputs inherit our Roboto stack */
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-sans, 'Roboto', 'Inter', ui-sans-serif, system-ui, sans-serif);
+  font-variation-settings: 'wght' 400;
+}
+
 pre,
 code {
   font-family: theme('fontFamily.mono');
@@ -34,6 +45,32 @@ code {
 }
 #transcriptPreview p:last-child {
   margin-bottom: 0 !important;
+}
+
+/* Transcript toolbar sizing adjustments */
+#transcriptToolbar {
+  min-height: 3rem; /* taller bar */
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  gap: 0.5rem;
+}
+#transcriptToolbar .tbtn {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 14px;
+}
+#transcriptToolbar .tbtn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Search input inside toolbar should fill vertical space */
+#transcriptToolbar .input {
+  height: 2.5rem !important;
+  min-height: 2.5rem;
+  font-size: 0.75rem; /* keep compact text */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .gist-scrollbar::-webkit-scrollbar {
@@ -86,7 +123,8 @@ html[data-theme='dark'] .tbtn {
 }
 
 .font-transcript {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+  font-variation-settings: 'wght' 400;
 }
 html[data-theme='dark'] #transcriptToolbar {
   background-color: rgba(40, 49, 45, 0.7);
@@ -127,6 +165,22 @@ html[data-theme='dark'] #transcriptToolbar {
   @include btn-outline(var(--color-primary), var(--color-primary), var(--color-primary-fg));
 }
 
+/* Summarize button: moved back here because build pipeline compiles ONLY this SCSS file
+   (scripts/build.mjs -> compileTailwind input = src/styles/design-system.scss) into dist/tailwind.css.
+   The old definition that still lives in src/tailwind.css is not part of the build output, so after
+   we removed this block earlier the class lost its styling. Keeping a single source of truth here. */
+.summarize-btn {
+  @include btn-base(
+    var(--color-primary),
+    var(--color-primary-hover),
+    var(--color-primary-active),
+    var(--color-primary-fg)
+  );
+  font-weight: 600;
+  letter-spacing: 0.25px;
+  box-shadow: var(--shadow-sm);
+}
+
 /* Utility helpers bridging to tokens */
 .border-token {
   border-color: var(--color-border);
@@ -136,6 +190,10 @@ html[data-theme='dark'] #transcriptToolbar {
 }
 .bg-surface-alt {
   background: var(--color-surface-alt);
+}
+.bg-surface-translucent {
+  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  backdrop-filter: blur(6px);
 }
 .text-soft {
   color: var(--color-text-soft);
@@ -148,4 +206,94 @@ html[data-theme='dark'] #transcriptToolbar {
 .tabs .tab-active {
   background: var(--color-primary);
   color: var(--color-primary-fg);
+}
+
+/* (Former .gist-tabs styles removed – using button-based panels now) */
+/* Panel toggle buttons (Summary / Transcript) */
+.panel-toggle {
+  @include focus-ring();
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.8125rem; /* ~13px */
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #e4e7e1; /* $color-green-100 */
+  color: #3a5a40; /* primary tone for visibility */
+  line-height: 1.2;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  cursor: pointer;
+  min-width: 0;
+  &:hover {
+    background: #dad7cd;
+  } /* $color-green-200 */
+  &[aria-pressed='true'] {
+    background: #3a5a40; /* $color-green-700 */
+    border-color: #3a5a40;
+    color: #ffffff;
+  }
+}
+html[data-theme='dark'] .panel-toggle {
+  background: #344e41; /* green-800 as base in dark */
+  color: #e4e7e1;
+  border-color: #456643; /* mid tone border */
+  &:hover {
+    background: #456643;
+  }
+  &[aria-pressed='true'] {
+    background: #588157; /* green-500 highlight in dark */
+    border-color: #588157;
+    color: #ffffff;
+  }
+}
+
+/* Dropdown (Mode & Detail) – force light (white) surfaces and softer borders */
+#modeDropdown,
+#detailDropdown {
+  background: #ffffff !important;
+  color: var(--color-text, #334155) !important;
+  border: 1px solid #e2e8f0 !important; /* force lighter border (slate-200) */
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
+  &:focus-visible {
+    outline: 2px solid var(--color-focus-ring, #3b82f6);
+    outline-offset: 1px;
+  }
+}
+
+/* Menus */
+#modeMenu,
+#detailMenu {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0; /* lighter border */
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+}
+
+#modeMenu li > a,
+#detailMenu li > a {
+  border-radius: var(--radius-sm, 0.375rem);
+}
+#modeMenu li > a:hover,
+#detailMenu li > a:hover {
+  background: #f1f5f9; /* slate-100 */
+  color: #1e293b;
+}
+
+/* Dark theme: keep dropdown surfaces white for contrast with surrounding dark UI */
+html[data-theme='dark'] #modeDropdown,
+html[data-theme='dark'] #detailDropdown,
+html[data-theme='dark'] #modeMenu,
+html[data-theme='dark'] #detailMenu {
+  background: #ffffff !important;
+  color: #1e293b !important;
+}
+html[data-theme='dark'] #modeMenu li > a:hover,
+html[data-theme='dark'] #detailMenu li > a:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }

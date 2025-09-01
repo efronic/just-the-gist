@@ -34,7 +34,25 @@ chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageS
 
 const handleSummarizeRequest = async ({ tabId, mode, detailLevel }: { tabId: number; mode: SummarizeMode; detailLevel: string; }) => {
   // 1) Ask content script for page extraction
-  const extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+  let extract: ExtractedPage | undefined;
+  try {
+    extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    // Fallback: if content script not loaded yet (page may not match or was preloaded before install), try injecting then retry once.
+    if (/Receiving end does not exist/i.test(msg) || /Could not establish connection/i.test(msg)) {
+      try {
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['dist/contentScript.js'] });
+        extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+      } catch (err2: unknown) {
+        const msg2 = err2 instanceof Error ? err2.message : String(err2);
+        throw new Error(`Failed to inject content script: ${msg2}`);
+      }
+    } else {
+      throw err;
+    }
+  }
+  if (!extract) throw new Error('No extraction result.');
 
   // 2) Load API config
   const { GEMINI_API_KEY, GEMINI_MODEL } = await chrome.storage.sync.get({

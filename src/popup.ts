@@ -248,6 +248,9 @@ const init = async () => {
     setTimeout(() => setStatus(''), 1200);
   });
 
+  // Track transcript load status so we can lazily load when transcript panel first shown
+  let transcriptLoadedFlag = false;
+
   btn.addEventListener('click', async () => {
     const mode = (document.getElementById('mode') as HTMLSelectElement).value as SummarizeMode;
     const detailLevel = (detailLevelSel?.value || 'standard');
@@ -267,14 +270,14 @@ const init = async () => {
       btn.disabled = false;
     }
   });
-  // Tabs setup (radio-based DaisyUI tabs)
-  const summaryRadio = document.getElementById('tabSummary') as HTMLInputElement | null;
-  const transcriptRadio = document.getElementById('tabTranscript') as HTMLInputElement | null;
+  // --- Panel toggle setup (button-based) ---
   const summaryPanel = document.getElementById('summaryTabPanel');
   const transcriptPanel = document.getElementById('transcriptTabPanel');
-  let transcriptLoadedFlag = false;
-  const refreshVisibility = () => {
-    const showSummary = summaryRadio?.checked;
+  const summaryBtn = document.getElementById('btnSummary') as HTMLButtonElement | null;
+  const transcriptBtn = document.getElementById('btnTranscript') as HTMLButtonElement | null;
+
+  const setActive = (which: 'summary' | 'transcript') => {
+    const showSummary = which === 'summary';
     if (showSummary) {
       summaryPanel?.classList.remove('hidden');
       transcriptPanel?.classList.add('hidden');
@@ -282,9 +285,13 @@ const init = async () => {
       summaryPanel?.classList.add('hidden');
       transcriptPanel?.classList.remove('hidden');
     }
+    // Update aria-pressed only (styling handled via .panel-toggle CSS)
+    summaryBtn?.setAttribute('aria-pressed', String(showSummary));
+    transcriptBtn?.setAttribute('aria-pressed', String(!showSummary));
   };
+
   const maybeLoadTranscript = async () => {
-    if (transcriptRadio?.checked && !transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
+    if (!transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
       await loadTranscriptIntoPopup(tab?.url);
       transcriptLoadedFlag = true;
       const container = document.getElementById('transcriptContainer');
@@ -292,10 +299,72 @@ const init = async () => {
       if (container && container.classList.contains('hidden') && noMsg) noMsg.classList.remove('hidden');
     }
   };
-  summaryRadio?.addEventListener('change', () => { refreshVisibility(); });
-  transcriptRadio?.addEventListener('change', () => { refreshVisibility(); maybeLoadTranscript(); });
-  // Initial state
-  refreshVisibility();
+
+  summaryBtn?.addEventListener('click', () => {
+    setActive('summary');
+  });
+  transcriptBtn?.addEventListener('click', async () => {
+    setActive('transcript');
+    await maybeLoadTranscript();
+  });
+
+  // Dropdown menu actions
+  // Mode & Detail DaisyUI dropdown logic (syncs to hidden selects for existing logic)
+  const modeDropdownBtn = document.getElementById('modeDropdown') as HTMLDivElement | null;
+  const modeDropdownLabel = document.getElementById('modeDropdownLabel') as HTMLSpanElement | null;
+  const modeMenu = document.getElementById('modeMenu') as HTMLUListElement | null;
+  const detailDropdownBtn = document.getElementById('detailDropdown') as HTMLDivElement | null;
+  const detailDropdownLabel = document.getElementById('detailDropdownLabel') as HTMLSpanElement | null;
+  const detailMenu = document.getElementById('detailMenu') as HTMLUListElement | null;
+
+  const closeAllMenus = () => {
+    modeDropdownBtn?.parentElement?.classList.remove('dropdown-open');
+    detailDropdownBtn?.parentElement?.classList.remove('dropdown-open');
+  };
+
+  const attachDropdown = (
+    btn: HTMLDivElement | null,
+    label: HTMLSpanElement | null,
+    menu: HTMLUListElement | null,
+    select: HTMLSelectElement | null,
+    attr: string
+  ) => {
+    if (!btn || !label || !menu || !select) return;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wrapper = btn.parentElement;
+      const willOpen = !wrapper?.classList.contains('dropdown-open');
+      closeAllMenus();
+      if (willOpen) wrapper?.classList.add('dropdown-open');
+    });
+    menu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        const val = (a as HTMLElement).getAttribute(attr);
+        if (!val) return;
+        select.value = val;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        label.textContent = a.textContent || val;
+        btn.parentElement?.classList.remove('dropdown-open');
+      });
+    });
+  };
+
+  attachDropdown(modeDropdownBtn, modeDropdownLabel, modeMenu, modeSelect, 'data-mode');
+  attachDropdown(detailDropdownBtn, detailDropdownLabel, detailMenu, detailLevelSel, 'data-detail');
+
+  // Initialize labels from selects
+  if (modeDropdownLabel && modeSelect) modeDropdownLabel.textContent = modeSelect.selectedOptions[0]?.textContent || modeSelect.value;
+  if (detailDropdownLabel && detailLevelSel) detailDropdownLabel.textContent = detailLevelSel.selectedOptions[0]?.textContent || detailLevelSel.value;
+
+  document.addEventListener('click', () => closeAllMenus());
+
+  // Initial state (summary visible)
+  setActive('summary');
+  // Optionally hide transcript button if feature disabled
+  if (SHOW_TRANSCRIPT_PANEL === false) {
+    transcriptBtn?.classList.add('hidden');
+  }
 
   // Button actions
   document.getElementById('tbCopy')?.addEventListener('click', () => {

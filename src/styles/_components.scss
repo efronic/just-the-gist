@@ -115,3 +115,5 @@
   );
   @include btn-outline(var(--color-primary), var(--color-primary), var(--color-primary-fg));
 }
+
+// (Removed obsolete .gist-tabs overrides; panels now toggled by buttons)

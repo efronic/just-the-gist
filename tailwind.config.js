@@ -8,11 +8,11 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          'Roboto',
           'Inter',
           'ui-sans-serif',
           'system-ui',
           'Segoe UI',
-          'Roboto',
           'Helvetica Neue',
           'Arial',
           'Noto Sans',

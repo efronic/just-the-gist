@@ -95,3 +95,69 @@ html[data-theme='dark'] .tbtn[aria-pressed='true'] {
 html[data-theme='dark'] #transcriptToolbar {
   background-color: rgba(28, 36, 48, 0.7);
 }
+
+/* === Design Tokens (minimal subset for summarize button) === */
+:root {
+  --color-primary: #3a5a40; /* green-700 */
+  --color-primary-hover: #344e41; /* green-800 */
+  --color-primary-active: #344e41; /* same as hover */
+  --color-primary-fg: #ffffff;
+  --color-focus-ring: rgba(58, 90, 64, 0.55);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --radius-md: 6px;
+}
+html[data-theme='dark'] {
+  --color-primary: #3a5a40; /* keep same in dark */
+  --color-primary-hover: #4d734d; /* green-600 */
+  --color-primary-active: #4d734d;
+  --color-primary-fg: #ffffff;
+  --color-focus-ring: rgba(163, 177, 138, 0.55);
+}
+
+/* === Summarize Button (standalone CSS version of SCSS mixin) === */
+.summarize-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem; /* 12px */
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+  letter-spacing: 0.25px;
+  box-shadow: var(--shadow-sm);
+}
+.summarize-btn:hover {
+  background: var(--color-primary-hover);
+}
+.summarize-btn:active {
+  background: var(--color-primary-active);
+}
+.summarize-btn:focus {
+  outline: none;
+}
+.summarize-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+.summarize-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+html[data-theme='dark'] .summarize-btn {
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+}
+html[data-theme='dark'] .summarize-btn:hover {
+  background: var(--color-primary-hover);
+}
+html[data-theme='dark'] .summarize-btn:active {
+  background: var(--color-primary-active);
+}
