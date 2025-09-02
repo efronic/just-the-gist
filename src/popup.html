@@ -58,8 +58,8 @@
     </div>
     <div class="mt-2 px-3 space-y-4" id="panelsWrapper">
       <!-- Summary Panel -->
-      <div id="summaryTabPanel" class="p-4 space-y-5 bg-white rounded-md border border-slate-200">
-        <div id="summaryTab" class="space-y-5">
+      <div id="summaryTabPanel" class="p-4 space-y-4 bg-white rounded-md border border-slate-200">
+        <div id="summaryTab" class="space-y-4">
           <div id="apiSection" class="space-y-2" style="display: none">
             <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-slate-700"
               >Google Gemini API key</label
@@ -114,94 +114,46 @@
               </button>
             </div>
           </div>
-          <!-- Controls -->
-          <div class="grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-1">
-              <span class="text-[11px] font-medium text-slate-700">Mode</span>
-              <div class="dropdown w-full">
-                <div
-                  tabindex="0"
-                  role="button"
-                  id="modeDropdown"
-                  class="btn w-full justify-between bg-surface-alt"
-                >
-                  <span id="modeDropdownLabel">Auto</span>
-                  <svg class="w-3 h-3 opacity-70" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fill-rule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <ul
-                  tabindex="0"
-                  id="modeMenu"
-                  class="dropdown-content menu bg-surface rounded-box z-10 w-40 p-2 shadow-sm"
-                >
-                  <li><a data-mode="auto">Auto</a></li>
-                  <li><a data-mode="page">Page</a></li>
-                  <li><a data-mode="video">Video</a></li>
-                </ul>
+          <!-- Controls (Mode / Detail / Summarize) inline -->
+          <div class="flex flex-col gap-2">
+            <div class="flex items-start gap-2">
+              <!-- Mode select (default Auto) -->
+              <div class="w-1/4 min-w-[105px]">
+                <label for="mode" class="sr-only">Mode</label>
+                <select id="mode" class="select select-bordered select-sm w-full">
+                  <option value="auto" selected>Auto</option>
+                  <option value="page">Page</option>
+                  <option value="video">Video</option>
+                </select>
               </div>
-              <select id="mode" class="hidden">
-                <option value="auto" selected>auto</option>
-                <option value="page">page</option>
-                <option value="video">video</option>
-              </select>
-            </div>
-            <div class="flex flex-col gap-1">
-              <span class="text-[11px] font-medium text-slate-700">Detail</span>
-              <div class="dropdown w-full">
-                <div
-                  tabindex="0"
-                  role="button"
-                  id="detailDropdown"
-                  class="btn w-full justify-between"
-                >
-                  <span id="detailDropdownLabel">Standard</span>
-                  <svg class="w-3 h-3 opacity-70" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fill-rule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <ul
-                  tabindex="0"
-                  id="detailMenu"
-                  class="dropdown-content menu bg-surface rounded-box z-10 w-48 p-2 shadow-sm"
-                >
-                  <li><a data-detail="concise">Concise</a></li>
-                  <li><a data-detail="standard">Standard</a></li>
-                  <li><a data-detail="detailed">Detailed</a></li>
-                  <li><a data-detail="expanded">Expanded</a></li>
-                </ul>
+              <!-- Detail select (default Standard) -->
+              <div class="w-1/4 min-w-[115px]">
+                <label for="detailLevelSelect" class="sr-only">Detail level</label>
+                <select id="detailLevelSelect" class="select select-bordered select-sm w-full">
+                  <option value="concise">Concise</option>
+                  <option value="standard" selected>Standard</option>
+                  <option value="detailed">Detailed</option>
+                  <option value="expanded">Expanded</option>
+                </select>
               </div>
-              <select id="detailLevelSelect" class="hidden">
-                <option value="concise">concise</option>
-                <option value="standard" selected>standard</option>
-                <option value="detailed">detailed</option>
-                <option value="expanded">expanded</option>
-              </select>
+              <!-- Summarize Button (same height) -->
+              <div class="flex-1 min-w-[140px] flex">
+                <button id="summarizeBtn" class="btn btn-primary btn-sm w-full font-semibold tracking-tight shadow-sm">Summarize</button>
+              </div>
             </div>
           </div>
-          <button id="summarizeBtn" class="summarize-btn w-full">Summarize this Page</button>
-          <div id="status" class="text-[10px] text-slate-600"></div>
+          </div>
+          <div id="status" class="text-[10px] text-slate-600 hidden"></div>
           <pre
             id="output"
-            class="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
+            class="hidden max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
           ></pre>
         </div>
       </div>
       <!-- Transcript Panel -->
-      <div
-        id="transcriptTabPanel"
-        class="p-3 space-y-3 bg-white rounded-md border border-slate-200 hidden"
-      >
+      <div id="transcriptTabPanel" class="bg-white hidden">
         <div>
-          <section id="transcriptContainer" class="space-y-3 hidden">
+          <section id="transcriptContainer" class="hidden">
             <div
               id="transcriptPreview"
               class="relative max-h-80 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-surface pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"

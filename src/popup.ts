@@ -4,13 +4,19 @@ const getActiveTab = async (): Promise<chrome.tabs.Tab | undefined> => {
 };
 
 const setStatus = (msg?: string) => {
-  const el = document.getElementById('status') as HTMLElement;
-  el.textContent = msg || '';
+  const el = document.getElementById('status') as HTMLElement | null;
+  if (!el) return;
+  const content = msg?.trim() || '';
+  el.textContent = content;
+  if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
 };
 
 const setOutput = (text?: string) => {
-  const el = document.getElementById('output') as HTMLElement;
-  el.textContent = text || '';
+  const el = document.getElementById('output') as HTMLElement | null;
+  if (!el) return;
+  const content = text?.trim() || '';
+  el.textContent = content;
+  if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
 };
 
 import type { SummarizeMode } from './types/extract';
@@ -175,26 +181,10 @@ const init = async () => {
     DETAIL_LEVEL: 'standard'
   });
 
-  // Populate mode select from shared constants
+  // Mode select is now static in markup (default Auto)
   const modeSelect = document.getElementById('mode') as HTMLSelectElement;
-  if (modeSelect && modeSelect.options.length === 3) {
-    // Replace existing options to avoid duplicates and keep labels nice-case
-    modeSelect.innerHTML = '';
-    const entries: Array<[SummarizeMode, string]> = [
-      [SUMMARIZE_MODE.auto, 'Auto'],
-      [SUMMARIZE_MODE.page, 'Page'],
-      [SUMMARIZE_MODE.video, 'Video']
-    ];
-    for (const [value, label] of entries) {
-      const opt = document.createElement('option');
-      opt.value = value;
-      opt.textContent = label;
-      modeSelect.appendChild(opt);
-    }
-    modeSelect.value = SUMMARIZE_MODE.auto;
-  }
   const apiSection = document.getElementById('apiSection') as HTMLElement;
-  const summarizeBtn = document.getElementById('summarizeBtn') as HTMLButtonElement;
+  const summarizeBtn = document.getElementById('summarizeBtn') as HTMLButtonElement; // legacy variable name retained for existing click handler logic
   const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement | null;
   const apiModelSelect = document.getElementById('apiModel') as HTMLSelectElement | null;
   const apiStatus = document.getElementById('apiStatus') as HTMLElement | null;
@@ -224,50 +214,13 @@ const init = async () => {
       await chrome.storage.sync.set({ GEMINI_API_KEY: key, GEMINI_MODEL: model });
       apiStatus && (apiStatus.textContent = 'Saved.');
       setTimeout(() => { if (apiStatus) apiStatus.textContent = ''; }, 1500);
-      // Hide section and enable summarize
       if (apiSection) apiSection.style.display = 'none';
       summarizeBtn.disabled = false;
       setStatus('Ready.');
+      updateSummarizeEnabled();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       apiStatus && (apiStatus.textContent = msg);
-    }
-  });
-
-  const btn = document.getElementById('summarizeBtn') as HTMLButtonElement;
-  // Initialize detail level selector from storage
-  const detailLevelSel = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
-  if (detailLevelSel && DETAIL_LEVEL) detailLevelSel.value = DETAIL_LEVEL;
-
-  // Copy URL button (new design)
-  document.getElementById('copyUrl')?.addEventListener('click', () => {
-    const urlInput = document.getElementById('url') as HTMLInputElement | HTMLElement | null;
-    const text = (urlInput as HTMLInputElement)?.value || urlInput?.textContent || '';
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(() => setStatus('URL copied')).catch(() => setStatus('Copy failed'));
-    setTimeout(() => setStatus(''), 1200);
-  });
-
-  // Track transcript load status so we can lazily load when transcript panel first shown
-  let transcriptLoadedFlag = false;
-
-  btn.addEventListener('click', async () => {
-    const mode = (document.getElementById('mode') as HTMLSelectElement).value as SummarizeMode;
-    const detailLevel = (detailLevelSel?.value || 'standard');
-    btn.disabled = true;
-    setStatus('Summarizing…');
-    setOutput('');
-    try {
-      const { text } = await summarize(mode, detailLevel);
-      setOutput(text);
-      setStatus('Done');
-      // Invalidate transcript loaded flag so it reloads when transcript tab opened
-      transcriptLoadedFlag = false;
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setStatus(msg);
-    } finally {
-      btn.disabled = false;
     }
   });
   // --- Panel toggle setup (button-based) ---
@@ -308,56 +261,19 @@ const init = async () => {
     await maybeLoadTranscript();
   });
 
-  // Dropdown menu actions
-  // Mode & Detail DaisyUI dropdown logic (syncs to hidden selects for existing logic)
-  const modeDropdownBtn = document.getElementById('modeDropdown') as HTMLDivElement | null;
-  const modeDropdownLabel = document.getElementById('modeDropdownLabel') as HTMLSpanElement | null;
-  const modeMenu = document.getElementById('modeMenu') as HTMLUListElement | null;
-  const detailDropdownBtn = document.getElementById('detailDropdown') as HTMLDivElement | null;
-  const detailDropdownLabel = document.getElementById('detailDropdownLabel') as HTMLSpanElement | null;
-  const detailMenu = document.getElementById('detailMenu') as HTMLUListElement | null;
-
-  const closeAllMenus = () => {
-    modeDropdownBtn?.parentElement?.classList.remove('dropdown-open');
-    detailDropdownBtn?.parentElement?.classList.remove('dropdown-open');
+  // Mode selection enable logic for native select
+  const updateSummarizeEnabled = () => {
+    // If API section visible & no key, keep disabled; else enable (mode always defaults to Auto)
+    if (apiSection && apiSection.style.display !== 'none' && !GEMINI_API_KEY) {
+      summarizeBtn.disabled = true; return;
+    }
+    summarizeBtn.disabled = false;
   };
+  modeSelect?.addEventListener('change', updateSummarizeEnabled);
+  updateSummarizeEnabled();
 
-  const attachDropdown = (
-    btn: HTMLDivElement | null,
-    label: HTMLSpanElement | null,
-    menu: HTMLUListElement | null,
-    select: HTMLSelectElement | null,
-    attr: string
-  ) => {
-    if (!btn || !label || !menu || !select) return;
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const wrapper = btn.parentElement;
-      const willOpen = !wrapper?.classList.contains('dropdown-open');
-      closeAllMenus();
-      if (willOpen) wrapper?.classList.add('dropdown-open');
-    });
-    menu.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        const val = (a as HTMLElement).getAttribute(attr);
-        if (!val) return;
-        select.value = val;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        label.textContent = a.textContent || val;
-        btn.parentElement?.classList.remove('dropdown-open');
-      });
-    });
-  };
-
-  attachDropdown(modeDropdownBtn, modeDropdownLabel, modeMenu, modeSelect, 'data-mode');
-  attachDropdown(detailDropdownBtn, detailDropdownLabel, detailMenu, detailLevelSel, 'data-detail');
-
-  // Initialize labels from selects
-  if (modeDropdownLabel && modeSelect) modeDropdownLabel.textContent = modeSelect.selectedOptions[0]?.textContent || modeSelect.value;
-  if (detailDropdownLabel && detailLevelSel) detailDropdownLabel.textContent = detailLevelSel.selectedOptions[0]?.textContent || detailLevelSel.value;
-
-  document.addEventListener('click', () => closeAllMenus());
+  // Track transcript load once per session
+  let transcriptLoadedFlag = false;
 
   // Initial state (summary visible)
   setActive('summary');
@@ -435,6 +351,94 @@ const init = async () => {
   };
   tsBtn?.addEventListener('click', () => { togglePressed(tsBtn); rerender(); });
   compactBtn?.addEventListener('click', () => { togglePressed(compactBtn); rerender(); });
+
+  // Summarize action handler (restored after UI refactor)
+  summarizeBtn?.addEventListener('click', async () => {
+    if (summarizeBtn.disabled) return;
+    try {
+      const originalLabel = summarizeBtn.innerHTML;
+      const mode = (modeSelect?.value || 'auto') as SummarizeMode;
+      const detailSelect = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
+      const detailLevel = (detailSelect?.value || 'standard').trim();
+
+      // Disable interactive controls
+      summarizeBtn.disabled = true;
+      modeSelect && (modeSelect.disabled = true);
+      detailSelect && (detailSelect.disabled = true);
+
+      // Clear any prior status (we only show errors now)
+      setStatus('');
+      setOutput('');
+      // Show spinner only (no animated dots)
+      let cancelled = false;
+      summarizeBtn.innerHTML = '<span class="loading loading-spinner loading-xs mr-1"></span>Summarizing';
+
+      try {
+        const result = await summarize(mode, detailLevel);
+        let summaryText = '';
+        if (typeof result === 'string') {
+          summaryText = result;
+        } else if (result && typeof result === 'object') {
+          // Prefer top-level text property
+          if ('text' in result && typeof (result as any).text === 'string') {
+            summaryText = (result as any).text;
+          } else if ((result as any).summary) {
+            summaryText = String((result as any).summary);
+          } else {
+            summaryText = JSON.stringify(result, null, 2);
+          }
+        }
+        setOutput(summaryText);
+
+        // Attach raw JSON viewer (on demand) below output if structured object
+        if (result && typeof result === 'object') {
+          const existing = document.getElementById('rawDetails');
+          if (!existing) {
+            const outputEl = document.getElementById('output');
+            if (outputEl) {
+              const details = document.createElement('details');
+              details.id = 'rawDetails';
+              details.className = 'mt-2 text-[10px]';
+              const summary = document.createElement('summary');
+              summary.textContent = 'Show raw data';
+              summary.className = 'cursor-pointer select-none text-primary hover:underline font-medium';
+              const pre = document.createElement('pre');
+              pre.className = 'mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-2';
+              pre.textContent = JSON.stringify(result, null, 2);
+              details.appendChild(summary);
+              details.appendChild(pre);
+              outputEl.insertAdjacentElement('afterend', details);
+            }
+          } else {
+            // Update existing raw details if already present
+            const pre = existing.querySelector('pre');
+            if (pre) pre.textContent = JSON.stringify(result, null, 2);
+          }
+        }
+      } finally {
+        cancelled = true;
+        // Replace spinner with a check icon to indicate success
+        summarizeBtn.innerHTML = '<span class="text-success" aria-hidden="true">✔️</span><span class="ml-1">Summarize</span>';
+        // After a short delay restore original label
+        setTimeout(() => {
+          if (!summarizeBtn.disabled) {
+            summarizeBtn.innerHTML = originalLabel;
+          } else {
+            summarizeBtn.innerHTML = originalLabel; // fallback
+          }
+        }, 1200);
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      summarizeBtn.innerHTML = '<span class="text-error" aria-hidden="true">⚠️</span><span class="ml-1">Retry</span>';
+      setStatus(`Error: ${msg}`);
+    } finally {
+      summarizeBtn.disabled = false;
+      modeSelect && (modeSelect.disabled = false);
+      const detailSelect = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
+      detailSelect && (detailSelect.disabled = false);
+    }
+  });
 
   // Search interaction
   const searchInput = document.getElementById('transcriptSearch') as HTMLInputElement | null;
