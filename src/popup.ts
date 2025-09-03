@@ -392,6 +392,33 @@ const init = async () => {
 
         // Attach raw JSON viewer (on demand) below output if structured object
         if (result && typeof result === 'object') {
+          // Persist transcript cues (if a YouTube video) so Transcript tab can render even if user opens it after summarization
+          try {
+            const extractObj: any = (result as any).extract;
+            const videoObj: any = extractObj?.video;
+            if (videoObj?.cues?.length && videoObj?.pageUrl) {
+              const videoId = extractVideoIdFromUrl(videoObj.pageUrl);
+              if (videoId) {
+                const cacheKey = `yt_transcript_${videoId}`;
+                // Store in same shape popup expects { cues, lang, truncated }
+                await chrome.storage.local.set({ [cacheKey]: { cues: videoObj.cues, lang: videoObj.transcriptLanguage, truncated: videoObj.transcriptTruncated } });
+                // Force transcript to reload next time (or immediately if tab active)
+                try {
+                  // @ts-ignore - access the flag in closure if declared; if not available, ignore
+                  if (typeof transcriptLoadedFlag !== 'undefined') {
+                    // Reset so that clicking Transcript loads fresh copy
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    (transcriptLoadedFlag as any) = false;
+                    // If transcript panel currently active, load immediately
+                    const transcriptPanel = document.getElementById('transcriptTabPanel');
+                    if (transcriptPanel && !transcriptPanel.classList.contains('hidden')) {
+                      await loadTranscriptIntoPopup(videoObj.pageUrl);
+                    }
+                  }
+                } catch { /* ignore */ }
+              }
+            }
+          } catch { /* ignore */ }
           const existing = document.getElementById('rawDetails');
           if (!existing) {
             const outputEl = document.getElementById('output');
