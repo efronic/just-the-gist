@@ -33,6 +33,11 @@ chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageS
 // Types moved to src/types/extract.ts
 
 const handleSummarizeRequest = async ({ tabId, mode, detailLevel }: { tabId: number; mode: SummarizeMode; detailLevel: string; }) => {
+  const tabInfo = await chrome.tabs.get(tabId);
+  const canInjectInto = (url?: string | null) => !!url && /^(https?|file):/i.test(url) && !/^(chrome:|edge:|chrome-extension:|about:|moz-extension:)/i.test(url);
+  if (!canInjectInto(tabInfo.url)) {
+    throw new Error('Cannot summarize this page type (restricted or unsupported URL).');
+  }
   // 1) Ask content script for page extraction
   let extract: ExtractedPage | undefined;
   try {
@@ -42,11 +47,19 @@ const handleSummarizeRequest = async ({ tabId, mode, detailLevel }: { tabId: num
     // Fallback: if content script not loaded yet (page may not match or was preloaded before install), try injecting then retry once.
     if (/Receiving end does not exist/i.test(msg) || /Could not establish connection/i.test(msg)) {
       try {
-        await chrome.scripting.executeScript({ target: { tabId }, files: ['dist/contentScript.js'] });
-        extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+        // Correct path inside packaged extension (manifest strips 'dist/')
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['contentScript.js'] });
+        try {
+          extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+        } catch {
+          // Soft retry after tiny delay to mitigate race with build/watch
+          await new Promise(r => setTimeout(r, 120));
+          await chrome.scripting.executeScript({ target: { tabId }, files: ['contentScript.js'] });
+          extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode }) as ExtractedPage;
+        }
       } catch (err2: unknown) {
         const msg2 = err2 instanceof Error ? err2.message : String(err2);
-        throw new Error(`Failed to inject content script: ${msg2}`);
+        throw new Error(`Failed to inject content script after retry: ${msg2}`);
       }
     } else {
       throw err;

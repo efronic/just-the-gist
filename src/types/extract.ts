@@ -19,6 +19,8 @@ export type ExtractedVideo = {
     hasVideo: boolean;
     // Direct media source or embed source if available
     src?: string;
+    // Platform-specific video identifier (e.g., YouTube video id)
+    videoId?: string;
     // Human-readable title of the video
     title?: string;
     // Length of the video in seconds, if detectable
