@@ -490,6 +490,42 @@ const init = async () => {
       await chrome.storage.sync.set({ THEME: next });
     } catch {/* ignore */ }
   });
+
+  // --- Dynamic transcript sizing ---
+  const transcriptPreview = document.getElementById('transcriptPreview');
+  const recomputeTranscriptHeight = () => {
+    if (!transcriptPreview) return;
+    if (transcriptPreview.classList.contains('dynamic-resize-disabled')) return; // skip when expanded override
+    // Available vertical space: popup body height - top offset - bottom padding margin
+    const bodyRect = document.body.getBoundingClientRect();
+    const rect = transcriptPreview.getBoundingClientRect();
+    const bottomPadding = 12; // small buffer
+    const available = bodyRect.height - rect.top - bottomPadding;
+    // Clamp min / max
+    const clamped = Math.max(180, Math.min(available, 1200));
+    transcriptPreview.style.maxHeight = clamped + 'px';
+  };
+  const scheduleRecompute = () => requestAnimationFrame(recomputeTranscriptHeight);
+  window.addEventListener('resize', scheduleRecompute);
+  const observer = new ResizeObserver(() => scheduleRecompute());
+  observer.observe(document.body);
+  scheduleRecompute();
+
+  // Integrate with expand button: when expanded, remove maxHeight limit; when collapsed restore dynamic behavior
+  const expandBtn = document.getElementById('tbExpand');
+  expandBtn?.addEventListener('click', () => {
+    if (!transcriptPreview) return;
+    const pressed = expandBtn.getAttribute('aria-pressed') === 'true';
+    if (!pressed) {
+      // Will become expanded
+      transcriptPreview.classList.add('dynamic-resize-disabled');
+      transcriptPreview.style.maxHeight = 'none';
+    } else {
+      transcriptPreview.classList.remove('dynamic-resize-disabled');
+      transcriptPreview.style.maxHeight = '';
+      scheduleRecompute();
+    }
+  });
 };
 
 // --- Utility functions ---
