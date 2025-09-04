@@ -11,12 +11,37 @@ const setStatus = (msg?: string) => {
   if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
 };
 
+// Central scroll state updater: only allow scrolling once there is content.
+const updateScrollState = () => {
+  const outputEl = document.getElementById('output');
+  const summaryPanel = document.getElementById('summaryTabPanel');
+  const transcriptContainer = document.getElementById('transcriptContainer');
+  // Summary present if output visible and has non-empty text
+  const hasSummary = !!(outputEl && !outputEl.classList.contains('hidden') && outputEl.textContent && outputEl.textContent.trim().length);
+  // Transcript considered present if container is visible (content already rendered by loader)
+  const hasTranscript = !!(transcriptContainer && !transcriptContainer.classList.contains('hidden'));
+
+  // For summary output element: toggle overflow only when we actually have content.
+  if (outputEl) {
+    if (hasSummary) {
+      outputEl.classList.add('overflow-auto');
+    } else {
+      outputEl.classList.remove('overflow-auto');
+    }
+  }
+  // Panel itself keeps overflow hidden always (children manage scroll). If neither summary nor transcript, ensure no stray scrollbars.
+  if (summaryPanel && !hasSummary) {
+    // Nothing to show yet; remove potential bottom spacing artifacts if any future changes add them.
+  }
+};
+
 const setOutput = (text?: string) => {
   const el = document.getElementById('output') as HTMLElement | null;
   if (!el) return;
   const content = text?.trim() || '';
   el.textContent = content;
   if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
+  updateScrollState();
 };
 
 import type { SummarizeMode } from './types/extract';
@@ -152,6 +177,7 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
       previewEl.classList.remove('max-h-[800px]');
       if (!previewEl.classList.contains('max-h-80')) previewEl.classList.add('max-h-80');
     }
+    updateScrollState();
   } catch { /* ignore */ }
 };
 

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body
-    class="w-[480px] h-[620px] overflow-y-auto font-sans antialiased bg-surface text-slate-800 dark:text-base-content"
+    class="w-[680px] h-[600px] overflow-hidden flex flex-col font-sans antialiased bg-surface text-slate-800 dark:text-base-content"
   >
     <header class="bg-primary px-3 py-4 flex items-center justify-between shadow-sm">
       <h1 class="text-lg font-semibold tracking-tight text-white">Just the Gist</h1>
@@ -50,15 +50,15 @@
       </div>
     </header>
     <!-- Tab Buttons Replacement -->
-    <div class="mt-3 px-3">
+  <div class="px-3 pt-2">
       <div class="flex gap-2 items-start">
         <button id="btnSummary" class="panel-toggle" aria-pressed="true">Summary</button>
         <button id="btnTranscript" class="panel-toggle" aria-pressed="false">Transcript</button>
       </div>
     </div>
-  <div class="mt-2 px-3" id="panelsWrapper">
+  <div class="px-3 my-2 flex-1 min-h-0 flex flex-col overflow-hidden" id="panelsWrapper">
       <!-- Summary Panel -->
-      <div id="summaryTabPanel" class="p-4 bg-white rounded-md border border-slate-200">
+  <div id="summaryTabPanel" class="p-4 bg-white rounded-md border border-slate-200 flex-1 min-h-0 overflow-hidden flex flex-col">
         <div id="summaryTab" class="">
           <div id="apiSection" class="space-y-2" style="display: none">
             <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-slate-700"
@@ -146,17 +146,18 @@
           <div id="status" class="text-[10px] text-slate-600 hidden"></div>
           <pre
             id="output"
-            class="hidden max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
+            class="hidden flex-1 min-h-0 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] leading-snug"
           ></pre>
       </div>
               <!-- Transcript Panel -->
-      <div id="transcriptTabPanel" class=" hidden">
-        <div>
+  <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">
+        <div class="flex flex-col flex-1 min-h-0 h-full">
           <section id="transcriptContainer" class="hidden">
-            <div
-              id="transcriptPreview"
-              class="relative overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-surface pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
-            >
+            <div class="flex flex-col flex-1 min-h-0 h-full">
+              <div
+                id="transcriptPreview"
+                class="relative flex-1 min-h-0 max-h-full overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-surface pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
+              >
               <div
                 id="transcriptToolbar"
                 class="sticky -top-px left-0 right-0 z-10 flex items-center gap-2 px-2 py-1.5 bg-surface-translucent border-b border-slate-200"
@@ -304,19 +305,18 @@
                   />
                 </div>
               </div>
-              <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+                <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+              </div>
+              <div id="transcriptMeta" class="text-[11px] text-slate-500"></div>
             </div>
-            <div id="transcriptMeta" class="text-[11px] text-slate-500"></div>
           </section>
-          <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">
-            No transcript available for this page/video.
-          </div>
+          <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">No transcript available for this page/video.</div>
         </div>
       </div>
       </div>
 
     </div>
-    <main class="px-4 pb-6 space-y-6"></main>
+  <!-- Removed unused main that caused extra vertical space -->
     <script type="module" src="popup.js"></script>
   </body>
 </html>
