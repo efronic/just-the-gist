@@ -1,7 +1,9 @@
 /// <reference types="chrome" />
 import { callGemini } from './gemini';
-import type { ExtractedCue, ExtractedVideo, ExtractedPage, SummarizeMode } from './types/extract';
+import type { ExtractedPage, SummarizeMode } from './types/extract';
 import { SUMMARIZE_MODE } from './types/extract';
+import type { InboundRuntimeMessage, SummarizeTabRequest } from './types/messages';
+import { isRuntimeMessage, isSummarizeTabRequest } from './types/messages';
 
 // Create context menu to summarize page
 chrome.runtime.onInstalled.addListener(() => {
@@ -18,9 +20,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   await handleSummarizeRequest({ tabId: tab.id, mode: SUMMARIZE_MODE.auto, detailLevel: 'standard' });
 });
 
-chrome.runtime.onMessage.addListener((msg: any, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-  if (msg?.type === 'SUMMARIZE_TAB') {
-    handleSummarizeRequest({ tabId: msg.tabId as number, mode: (msg.mode || SUMMARIZE_MODE.auto) as SummarizeMode, detailLevel: msg.detailLevel || 'standard' })
+chrome.runtime.onMessage.addListener((msg: unknown, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+  if (!isRuntimeMessage(msg)) return; // Ignore unrelated messages
+  if (isSummarizeTabRequest(msg)) {
+    const req = msg as SummarizeTabRequest;
+    handleSummarizeRequest({ tabId: req.tabId, mode: req.mode || SUMMARIZE_MODE.auto, detailLevel: req.detailLevel || 'standard' })
       .then(result => sendResponse({ ok: true, result }))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
@@ -97,8 +101,8 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const { url, title, mainText, video } = extract;
   const header = `You are a concise expert summarizer. Summarize the content at the URL below.\n\nURL: ${url}\nTitle: ${title}\nMode: ${mode}`;
 
-  const transcriptMeta = video?.hasVideo
-    ? `Transcript source: ${video.transcriptSource || 'none'}${video.transcriptLanguage ? `\nTranscript language: ${video.transcriptLanguage}` : ''}${video.transcriptTruncated ? '\nTranscript truncated: yes' : ''}`
+  const transcriptMeta = video.hasVideo
+    ? `Transcript source: ${video.transcriptSource}${video.transcriptLanguage ? `\nTranscript language: ${video.transcriptLanguage}` : ''}${video.transcriptTruncated ? '\nTranscript truncated: yes' : ''}`
     : 'Transcript source: none';
 
   // (legacy preview logic replaced below by detail-level specific logic)
@@ -109,7 +113,7 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const contentBlock = `\n\nExtracted page text (truncated to ${pageLimit} chars):\n${(mainText || '').slice(0, pageLimit)}`;
 
   // Cue inclusion policy: full coverage for detailed & expanded, larger slice for standard
-  const cuesAll = video?.cues || [];
+  const cuesAll = video.hasVideo ? video.cues : [];
   const cueLimits: Record<string, number> = {
     concise: 60,
     standard: 200,
@@ -125,7 +129,7 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const coverageLine = includeAll
     ? `Transcript cues included: ALL (${cuesAll.length})`
     : `Transcript cues included: ${cuesUsed.length} of ${cuesAll.length}${cuesAll.length > cuesUsed.length ? ' (partial for brevity)' : ''}`;
-  const cuesBlock = video?.hasVideo
+  const cuesBlock = video.hasVideo
     ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\n${transcriptMeta}\n${coverageLine}\n${cuesText}`
     : `\n\nVideo detected: no`;
 

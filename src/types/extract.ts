@@ -14,37 +14,33 @@ export type ExtractedCue = {
     endTime: number;
 };
 
-export type ExtractedVideo = {
-    // Indicates if the page has a primary video
+export interface ExtractedVideoBase {
     hasVideo: boolean;
-    // Direct media source or embed source if available
+}
+export interface NoVideo extends ExtractedVideoBase {
+    hasVideo: false;
+}
+export interface HasVideo extends ExtractedVideoBase {
+    hasVideo: true;
     src?: string;
-    // Platform-specific video identifier (e.g., YouTube video id)
     videoId?: string;
-    // Human-readable title of the video
     title?: string;
-    // Length of the video in seconds, if detectable
     durationSec?: number;
-    // Up to N cues (e.g., from text tracks / captions)
-    cues?: ExtractedCue[];
-    // Source of transcript cues: 'inpage' (from text tracks), 'fetched' (timedtext API), 'none'
-    transcriptSource?: 'inpage' | 'fetched' | 'none';
-    // Language code of transcript if known (e.g., 'en', 'en-US')
+    cues: ExtractedCue[]; // Present (can be empty array)
+    transcriptSource: 'inpage' | 'fetched' | 'none';
     transcriptLanguage?: string;
-    // True if transcript was truncated for size limits
     transcriptTruncated?: boolean;
-    // Canonical video page URL if known (e.g., a YouTube watch URL)
     pageUrl?: string;
-    // Detected video platform (used for platform-aware logic)
     sourcePlatform?: VideoPlatform;
-};
+}
+export type ExtractedVideo = NoVideo | HasVideo;
 
-export type ExtractedPage = {
+export interface ExtractedPage {
     url: string;
     title: string;
     mainText: string;
     video: ExtractedVideo;
-};
+}
 
 // Summarization modes shared across UI and background
 export type SummarizeMode = 'auto' | 'page' | 'video';
@@ -53,3 +49,26 @@ export const SUMMARIZE_MODE = {
     page: 'page',
     video: 'video'
 } as const;
+
+// Detail levels and their limits (centralized so popup/background stay in sync)
+export const DETAIL_LEVELS = ['concise', 'standard', 'detailed', 'expanded'] as const;
+export type DetailLevel = typeof DETAIL_LEVELS[number];
+export const PAGE_CHAR_LIMIT: Record<DetailLevel, number> = {
+    concise: 4000,
+    standard: 8000,
+    detailed: 15000,
+    expanded: 22000
+};
+export const CUE_LIMIT: Record<DetailLevel, number | 'all'> = {
+    concise: 60,
+    standard: 200,
+    detailed: 'all',
+    expanded: 'all'
+};
+
+// Transcript cache entry shape in chrome.storage.local (for YouTube primarily)
+export interface TranscriptCacheEntry {
+    cues: ExtractedCue[];
+    lang?: string;
+    truncated?: boolean;
+}

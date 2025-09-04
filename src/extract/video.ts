@@ -12,7 +12,7 @@ const detectPlatformFromUrl = (u: string | undefined) => {
 export const extractVideo = async (): Promise<ExtractedVideo> => {
     try {
         const vid = document.querySelector('video') as HTMLVideoElement | null;
-        if (!vid) { dlog('No <video> element found'); return { hasVideo: false }; }
+        if (!vid) { dlog('No <video> element found'); return { hasVideo: false } as ExtractedVideo; }
         let src = vid.currentSrc || vid.src || '';
         if (!src) { const ogVideoEl = document.querySelector('meta[property="og:video"]') as HTMLMetaElement | null; const ogVideo = ogVideoEl?.content; if (ogVideo) src = ogVideo; }
         const ogTitleEl = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null; const title = ogTitleEl?.content || document.title || '';
@@ -61,6 +61,6 @@ export const extractVideo = async (): Promise<ExtractedVideo> => {
             }
         }
         if (!cues.length) transcriptSource = 'none';
-        return { hasVideo: true, src, title, durationSec, cues, transcriptSource, transcriptLanguage, transcriptTruncated, pageUrl, sourcePlatform, videoId };
-    } catch { dwarn('extractVideo: failure'); return { hasVideo: false }; }
+        return { hasVideo: true, src, title, durationSec, cues, transcriptSource, transcriptLanguage, transcriptTruncated, pageUrl, sourcePlatform, videoId } as ExtractedVideo;
+    } catch { dwarn('extractVideo: failure'); return { hasVideo: false } as ExtractedVideo; }
 };

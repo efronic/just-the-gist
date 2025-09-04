@@ -396,7 +396,7 @@ const init = async () => {
           try {
             const extractObj: any = (result as any).extract;
             const videoObj: any = extractObj?.video;
-            if (videoObj?.cues?.length && (videoObj?.pageUrl || videoObj?.videoId)) {
+            if (videoObj && videoObj.hasVideo && videoObj.cues?.length && (videoObj.pageUrl || videoObj.videoId)) {
               const videoId = videoObj.videoId || extractVideoIdFromUrl(videoObj.pageUrl);
               if (videoId) {
                 const cacheKey = `yt_transcript_${videoId}`;
