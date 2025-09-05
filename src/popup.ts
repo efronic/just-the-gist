@@ -157,6 +157,8 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     if (contentEl) (contentEl as HTMLElement).innerHTML = buildTranscriptHtml(entry.cues, { showTs, compact });
     metaEl.textContent = `Language: ${entry.lang || 'unknown'} • Cues: ${entry.cues.length}${entry.truncated ? ' • (truncated at capture)' : ''}`;
     container.classList.remove('hidden');
+  // Ensure it becomes a flex column only when revealed so nested preview (flex-1) uses remaining height correctly
+  container.classList.add('flex', 'flex-col', 'flex-1', 'min-h-0');
     // Attach data attributes for later copy/download
     (container as any)._fullTranscript = fullText;
     (container as any)._cues = entry.cues;
@@ -260,9 +262,13 @@ const init = async () => {
     if (showSummary) {
       summaryPanel?.classList.remove('hidden');
       transcriptPanel?.classList.add('hidden');
+        // Optionally remove flex classes when hidden (not required, but keeps DOM tidy)
+        transcriptPanel?.classList.remove('flex', 'flex-col');
     } else {
       summaryPanel?.classList.add('hidden');
       transcriptPanel?.classList.remove('hidden');
+        // Ensure transcript panel participates in flex sizing chain only when visible
+        transcriptPanel?.classList.add('flex', 'flex-col');
     }
     // Update aria-pressed only (styling handled via .panel-toggle CSS)
     summaryBtn?.setAttribute('aria-pressed', String(showSummary));

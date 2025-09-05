@@ -151,13 +151,11 @@
       </div>
               <!-- Transcript Panel -->
   <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">
-        <div class="flex flex-col flex-1 min-h-0 h-full">
-          <section id="transcriptContainer" class="hidden">
-            <div class="flex flex-col flex-1 min-h-0 h-full">
-              <div
-                id="transcriptPreview"
-                class="relative flex-1 min-h-0 max-h-full overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-surface pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
-              >
+    <div id="transcriptContainer" class="hidden flex-1 min-h-0">
+          <div
+            id="transcriptPreview"
+            class="relative flex-1 min-h-0 overflow-y-auto scroll-smooth rounded-md border border-slate-200 bg-white dark:bg-surface pb-3 text-[13px] leading-relaxed font-transcript gist-scrollbar"
+          >
               <div
                 id="transcriptToolbar"
                 class="sticky -top-px left-0 right-0 z-10 flex items-center gap-2 px-2 py-1.5 bg-surface-translucent border-b border-slate-200"
@@ -305,13 +303,11 @@
                   />
                 </div>
               </div>
-                <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
-              </div>
-              <div id="transcriptMeta" class="text-[11px] text-slate-500"></div>
-            </div>
-          </section>
-          <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">No transcript available for this page/video.</div>
+            <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+          </div>
+          <div id="transcriptMeta" class="text-[11px] text-slate-500 mt-1"></div>
         </div>
+        <div id="noTranscriptMsg" class="text-[11px] text-slate-500 hidden">No transcript available for this page/video.</div>
       </div>
       </div>
 
