@@ -11,6 +11,44 @@ const setStatus = (msg?: string) => {
   if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
 };
 
+// Build adaptive success icon SVG (square + check) that inverts relative to button background.
+const buildSuccessIcon = (btn: HTMLButtonElement): string => {
+  // Compute background color from computed style (fallback to primary colors via CSS vars)
+  const cs = getComputedStyle(btn);
+  // Attempt to parse background-color; if transparent, fallback to theme primary color var
+  let bg = cs.backgroundColor || '';
+  if (!bg || /transparent|rgba\(0, 0, 0, 0\)/i.test(bg)) {
+    // DaisyUI variable-based theme (approx) – attempt reading --p / --pc (primary / primary-content)
+    const root = getComputedStyle(document.documentElement);
+    const p = root.getPropertyValue('--p').trim();
+    if (p) bg = p;
+  }
+  // Parse rgb/rgba
+  const rgbMatch = bg.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  let luminance = 0.15; // default assume darkish
+  if (rgbMatch) {
+    const r = parseInt(rgbMatch[1], 10) / 255;
+    const g = parseInt(rgbMatch[2], 10) / 255;
+    const b = parseInt(rgbMatch[3], 10) / 255;
+    const lin = (c: number) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    luminance = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  }
+  const isDark = luminance < 0.5;
+  // Colors: square fill = lighter surface if dark button else primary (or success) toned; outline not required (flat glyph)
+  // We'll use CSS vars so theme changes propagate: --p (primary), --pc (primary content), --b1 (base-100), --n (neutral)
+  const root = getComputedStyle(document.documentElement);
+  const primary = root.getPropertyValue('--p').trim() || root.getPropertyValue('--color-primary').trim();
+  const primaryContent = root.getPropertyValue('--pc').trim() || root.getPropertyValue('--color-primary-fg').trim();
+  const base100 = root.getPropertyValue('--b1').trim() || root.getPropertyValue('--color-surface-alt').trim();
+  const neutral = root.getPropertyValue('--n').trim() || root.getPropertyValue('--color-text').trim();
+  const darkFill = primary; // when light button we invert
+  const lightFill = base100 || primaryContent;
+  const fill = isDark ? lightFill : darkFill;
+  const check = isDark ? primary : primaryContent || neutral;
+  // Provided SVG path adapted and scaled down; we remove large outer transform context.
+  return `<span class="inline-flex items-center justify-center w-4 h-4" aria-hidden="true"><svg viewBox="0 0 21 21" class="w-4 h-4" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="20" height="20" rx="2.5" fill="${fill}" stroke="${check}" stroke-width="0.5"/><path d="M7.9 10.6l2.1 2 4.4-4.2 1.1 1.3-5.5 5.4-3.3-3.2 1.2-1.3z" fill="${check}"/></svg></span>`;
+};
+
 // Central scroll state updater: only allow scrolling once there is content.
 const updateScrollState = () => {
   const outputEl = document.getElementById('output');
@@ -35,12 +73,67 @@ const updateScrollState = () => {
   }
 };
 
+// Lightweight markdown-ish formatter for summary (bold, italic, lists, headings, paragraphs)
+const formatSummary = (raw: string): string => {
+  if (!raw.trim()) return '';
+  let txt = raw.replace(/\r\n?/g, '\n');
+  // Escape basic HTML first
+  txt = txt.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
+  // Bold **text**
+  txt = txt.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic *text*
+  txt = txt.replace(/(?<!\*)\*(?!\*)([^\n*]+?)\*(?!\*)/g, '<em>$1</em>');
+  const lines = txt.split(/\n+/);
+  const blocks: string[] = [];
+  let listBuffer: string[] = [];
+  const flushList = () => {
+    if (!listBuffer.length) return;
+    blocks.push('<ul class="list-disc ml-5 mb-3 marker:text-slate-400 sp-list">' + listBuffer.join('') + '</ul>');
+    listBuffer = [];
+  };
+  for (const line of lines) {
+    const l = line.trim();
+    if (!l) { flushList(); continue; }
+    // Heading heuristic: lines starting with # or ending with : and short
+    if (/^#{1,4}\s+/.test(l)) {
+      flushList();
+      const level = Math.min(4, l.match(/^#+/)![0].length);
+      const content = l.replace(/^#{1,4}\s+/, '');
+      blocks.push(`<h${level} class="mt-4 mb-2 font-semibold text-slate-700 first:mt-0">${content}</h${level}>`);
+      continue;
+    }
+    if (/^[\-\*]\s+/.test(l)) { // unordered list item
+      listBuffer.push('<li class="mb-1">' + l.replace(/^[\-\*]\s+/, '') + '</li>');
+      continue;
+    }
+    if (/^\d+\.\s+/.test(l)) { // ordered list (flush unordered, treat as ordered block)
+      flushList();
+      const match = l.match(/^(\d+)\.\s+(.*)$/);
+      if (match) {
+        // Simple single-item ordered list accumulation not implemented; treat each numeric line as its own list for now
+        blocks.push('<ol class="list-decimal ml-5 mb-3 marker:text-slate-400 sp-list"><li>' + match[2] + '</li></ol>');
+        continue;
+      }
+    }
+    flushList();
+    // Paragraph
+    blocks.push('<p class="mb-3 last:mb-0 sp-p">' + l + '</p>');
+  }
+  flushList();
+  return blocks.join('\n');
+};
+
 const setOutput = (text?: string) => {
   const el = document.getElementById('output') as HTMLElement | null;
   if (!el) return;
   const content = text?.trim() || '';
-  el.textContent = content;
-  if (content) el.classList.remove('hidden'); else el.classList.add('hidden');
+  if (content) {
+    el.innerHTML = formatSummary(content);
+    el.classList.remove('hidden');
+  } else {
+    el.innerHTML = '';
+    el.classList.add('hidden');
+  }
   updateScrollState();
 };
 
@@ -112,8 +205,9 @@ const buildTranscriptHtml = (cues: StoredTranscript['cues'], opts: { showTs: boo
     const last = para[para.length - 1];
     const duration = last.endTime - first.startTime;
     const body = para.map(c => fmtCue(c.text)).join(opts.compact ? ' ' : ' ');
-    const tsLabel = opts.showTs ? `<span class="inline-block text-gray-500 mr-2 select-none">${formatTs(first.startTime)}</span>` : '';
-    parts.push(`<p class="m-0 ${opts.compact ? '' : 'mb-2'}">${tsLabel}${body}</p>`);
+    const tsLabel = opts.showTs ? `<span class="ts-badge select-none">${formatTs(first.startTime)}</span>` : '';
+    const spacing = opts.compact ? '' : ' tpara';
+    parts.push(`<p class="m-0${spacing}">${tsLabel}<span class="ttext">${body}</span></p>`);
     para = [];
   };
   for (const cue of cues) {
@@ -471,7 +565,8 @@ const init = async () => {
       } finally {
         cancelled = true;
         // Replace spinner with a check icon to indicate success
-        summarizeBtn.innerHTML = '<span class="text-success" aria-hidden="true">✔️</span><span class="ml-1">Summarize</span>';
+        // Adaptive success icon using provided SVG concept (inverts colors based on button bg luminance)
+        summarizeBtn.innerHTML = buildSuccessIcon(summarizeBtn) + '<span class="ml-1">Summarize</span>';
         // After a short delay restore original label
         setTimeout(() => {
           if (!summarizeBtn.disabled) {

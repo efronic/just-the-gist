@@ -105,8 +105,6 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
     ? `Transcript source: ${video.transcriptSource}${video.transcriptLanguage ? `\nTranscript language: ${video.transcriptLanguage}` : ''}${video.transcriptTruncated ? '\nTranscript truncated: yes' : ''}`
     : 'Transcript source: none';
 
-  // (legacy preview logic replaced below by detail-level specific logic)
-
   // Adjust how much page text we include based on detail level
   const pageCharLimits: Record<string, number> = { concise: 4000, standard: 8000, detailed: 15000, expanded: 22000 };
   const pageLimit = pageCharLimits[detailLevel] ?? 8000;
@@ -124,7 +122,6 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const includeAll = !isFinite(cueLimit);
   const cuesUsed = includeAll ? cuesAll : cuesAll.slice(0, cueLimit);
 
-  // Format cues compactly to reduce token usage: merge small gaps optional (future). For now simple list.
   const cuesText = cuesUsed.map((c, i) => `${i + 1}. [${c.startTime}-${c.endTime}] ${c.text}`).join('\n');
   const coverageLine = includeAll
     ? `Transcript cues included: ALL (${cuesAll.length})`
@@ -133,40 +130,35 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
     ? `\n\nVideo detected: yes\nVideo title: ${video.title || ''}\nVideo source: ${video.src || ''}\nVideo pageUrl: ${video.pageUrl || ''}\nVideo platform: ${video.sourcePlatform || ''}\nVideo durationSec: ${video.durationSec ?? ''}\n${transcriptMeta}\n${coverageLine}\n${cuesText}`
     : `\n\nVideo detected: no`;
 
+  // --- Adaptive content-type heuristics ---
+  const classifierContext = [title || '', video.hasVideo ? (video.title || '') : '', (mainText || '').slice(0, 800)].join('\n');
+  const isEntertainment = /(trailer|vlog|reaction|music video|gameplay|let's play|lets play|comedy|stand.?up|sketch|interview clip|highlights|memes?)/i.test(classifierContext);
+  const isHowTo = /(how to|tutorial|guide|walkthrough|step by step|setup|configuration|install|installation|fixing|troubleshoot|troubleshooting)/i.test(classifierContext);
+  const isMeeting = /(meeting|standup|stand-up|sprint review|all-hands|retrospective|retro|1:?1|one-on-one|quarterly review|town hall|sync)/i.test(classifierContext);
+  const isAcademic = /(lecture|seminar|conference|research|paper|thesis|study|experiment|analysis|dataset)/i.test(classifierContext);
+  const isNews = /(breaking news|news update|press conference|headline|reporting live|journalist|segment|newsroom)/i.test(classifierContext);
+  const contentType = isMeeting ? 'meeting' : isHowTo ? 'tutorial' : isAcademic ? 'academic' : isNews ? 'news' : isEntertainment ? 'entertainment' : 'general';
+
+  const adaptiveGuidance = {
+    entertainment: `Tone: neutral & concise. Focus on themes, notable moments, participants, cultural/contextual references, style. DO NOT fabricate action items. If template calls for action items, state: "No actionable tasks – entertainment content."`,
+    tutorial: `Emphasize: objective, prerequisites, ordered steps (succinct imperatives), tools/commands, pitfalls, final outcome. Action items = next steps a learner should perform.`,
+    meeting: `Include: agenda (or inferred), key discussion points, decisions, blockers, owners + action items (who + what; due date only if explicitly stated), follow-ups. Do not invent owners.`,
+    academic: `Highlight: research question, methodology, key findings, metrics/data, limitations, implications, future work (as action items only if framed as recommendations).`,
+    news: `Capture: headline summary, key facts (who/what/when/where/why/how), timeline, stakeholders, short verbatim quotes, implications. Only include action items if explicit calls to action are stated.`,
+    general: `Balanced summary: key points, TL;DR, optional action items only if logical next steps are clearly expressed.`
+  } as const;
+
   const styleInstructions: Record<string, string> = {
-    concise: `Provide:
-- 3-5 bullet points
-- 1 sentence TL;DR
-Keep under ~180 words.
-Focus only on the most central facts or takeaways.`,
-    standard: `Provide:
-- 5-10 key bullet points
-- TL;DR (1-2 sentences)
-- Action items (if any)
-Aim for completeness without unnecessary fluff.`,
-    detailed: `Provide structured sections:
-1. TL;DR (1-2 sentences)
-2. Key Points (8-15 bullets)
-3. Detailed Walkthrough (chronological or logical flow, referencing timestamps when helpful)
-4. Notable Quotes (verbatim short quotes if present in transcript)
-5. Data / Metrics (any numbers, stats, dates)
-6. Action Items / Recommendations
-Length target: 400-700 words. Avoid hallucinations. Cite timestamps in (mm:ss) form when using transcript cues.`,
-    expanded: `Provide comprehensive structured analysis:
-1. Executive TL;DR (1-2 sentences)
-2. Extended Summary (2 short paragraphs)
-3. Key Insights (10-20 bullets)
-4. Detailed Section-by-Section or Topic Breakdown (reference timestamps (mm:ss) liberally; consolidate adjacent cues)
-5. Important Quotes (verbatim, trimmed, group by theme)
-6. Data & Facts Table (markdown style if multiple)
-7. Potential Implications / Analysis (avoid speculation beyond source) 
-8. Open Questions / Follow-up Ideas
-9. Action Items
-Max 1100 words. Remain faithful to provided cues and text.`
+    concise: `Provide:\n- 3-5 bullet points\n- 1 sentence TL;DR\nKeep under ~180 words. Focus only on the most central facts or takeaways.`,
+    standard: `Provide:\n- 5-10 key bullet points\n- TL;DR (1-2 sentences)\n- Action items (ONLY if content type logically yields them)\nAim for completeness without fluff.`,
+    detailed: `Provide structured sections:\n1. TL;DR (1-2 sentences)\n2. Key Points (8-15 bullets)\n3. Detailed Walkthrough (chronological or logical flow; reference timestamps (mm:ss) when helpful)\n4. Notable Quotes (verbatim short quotes if present)\n5. Context-Type Focus (see adaptive guidance)\n6. Data / Metrics (numbers, stats, dates)\n7. Action Items / Recommendations (omit or state none if not applicable)\nLength target: 400-700 words. Avoid hallucinations.`,
+    expanded: `Provide comprehensive structured analysis:\n1. Executive TL;DR (1-2 sentences)\n2. Extended Summary (2 short paragraphs)\n3. Key Insights (10-20 bullets)\n4. Detailed Section-by-Section or Topic Breakdown (reference timestamps (mm:ss) liberally; consolidate adjacent cues)\n5. Important Quotes (verbatim, trimmed, grouped)\n6. Data & Facts Table (markdown style if multiple items)\n7. Potential Implications / Analysis (avoid speculation)\n8. Open Questions / Follow-up Ideas\n9. Action Items (omit for entertainment; otherwise only if legitimate)\nMax 1100 words. Remain faithful to provided cues and text.`
   };
 
   const detailNote = `Detail level: ${detailLevel}`;
+  const adaptiveBlock = `\n\nCONTENT TYPE CLASSIFICATION: ${contentType.toUpperCase()}\nAdaptive Guidance:\n${adaptiveGuidance[contentType]}\nAction Item Rules:\n- Provide ONLY if content type supports them (tutorial, meeting, academic (future work), general when explicit).\n- For entertainment: explicitly state no action items and do not fabricate.`;
 
-  const task = `\n\nTask Instructions:\n${styleInstructions[detailLevel] || styleInstructions.standard}\n\nGlobal rules:\n- If transcript cues are present, treat them as primary source; page text supplements missing context.\n- Do not invent specifics not supported by cues or page.\n- If transcript source is 'none', state that and rely on page text only.\n- If transcript truncated or limited, note potential missing later content.\n- Preserve important proper nouns.\n- Avoid marketing fluff; keep factual.`;
-  return `${header}\n${detailNote}${cuesBlock}${contentBlock}${task}`;
+  const task = `\n\nTask Instructions:\n${styleInstructions[detailLevel] || styleInstructions.standard}\n\nGlobal rules:\n- If transcript cues are present, treat them as primary source; page text supplements missing context.\n- Do not invent specifics not supported by cues or page.\n- If transcript source is 'none', state that and rely on page text only.\n- If transcript truncated or limited, note potential missing later content.\n- Preserve important proper nouns.\n- Avoid marketing fluff; keep factual.\n- Respect adaptive guidance and action item rules.`;
+
+  return `${header}\n${detailNote}${cuesBlock}${contentBlock}${adaptiveBlock}${task}`;
 };

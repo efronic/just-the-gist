@@ -10,8 +10,10 @@
   transition:
     box-shadow 0.15s ease,
     background-color 0.2s ease;
+
   &--interactive {
     cursor: pointer;
+
     &:hover {
       box-shadow: var(--shadow-md);
     }
@@ -29,14 +31,17 @@
   border-radius: var(--radius-sm);
   background: var(--color-accent);
   color: var(--color-accent-fg);
+
   &--outline {
     background: transparent;
     border: 1px solid var(--color-accent);
   }
+
   &--primary {
     background: var(--color-primary);
     color: var(--color-primary-fg);
   }
+
   &--secondary {
     background: var(--color-secondary);
     color: var(--color-secondary-fg);
@@ -57,24 +62,30 @@
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+
   &:focus {
     outline: none;
   }
+
   &:focus-visible {
     box-shadow: 0 0 0 2px var(--color-focus-ring);
     border-color: var(--color-primary);
   }
+
   &::placeholder {
     color: var(--color-text-faint);
   }
+
   &--sm {
     padding: 0.375rem 0.625rem;
     font-size: 0.6875rem;
   }
+
   &--lg {
     padding: 0.625rem 0.875rem;
     font-size: 0.8125rem;
   }
+
   &[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
@@ -90,6 +101,7 @@
     var(--color-primary-fg)
   );
 }
+
 .gbtn-secondary {
   @include btn-base(
     var(--color-secondary),
@@ -98,6 +110,7 @@
     var(--color-secondary-fg)
   );
 }
+
 .gbtn-accent {
   @include btn-base(
     var(--color-accent),
@@ -106,6 +119,7 @@
     var(--color-accent-fg)
   );
 }
+
 .gbtn-outline {
   @include btn-base(
     transparent,

@@ -10,6 +10,8 @@
     "watch": "node scripts/build.mjs --watch",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
+    "lint:css": "stylelint 'src/**/*.scss'",
+    "lint:css:fix": "stylelint 'src/**/*.scss' --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "browserslist:update": "npx update-browserslist-db@latest",
@@ -25,6 +27,9 @@
     "eslint": "^9.9.0",
     "prettier": "^3.3.3",
     "sass": "^1.77.0",
+    "stylelint": "^16.7.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-config-standard-scss": "^13.0.0",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.4.5"
   },

@@ -1,6 +1,7 @@
 // Reusable mixins
 @mixin focus-ring($prop: box-shadow) {
   outline: none;
+
   &:focus-visible {
     #{$prop}: 0 0 0 2px var(--color-focus-ring);
   }
@@ -22,13 +23,17 @@
     background-color 0.15s ease,
     color 0.15s ease,
     border-color 0.15s ease;
+
   &:hover {
     background: $bg-hover;
   }
+
   &:active {
     background: $bg-active;
   }
-  @include focus-ring();
+
+  @include focus-ring;
+
   &[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
@@ -39,6 +44,7 @@
   background: transparent;
   color: $color;
   border-color: $color;
+
   &:hover {
     background: $hover-bg;
     color: $hover-fg;
