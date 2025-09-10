@@ -5,7 +5,6 @@
 
 /* 1. Font import */
 @use 'tokens.generated' as *;
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* 2. Generated tokens (raw hex + theme vars) */
 
@@ -69,6 +68,13 @@ body,
     'calt' 1;
 }
 
+/* Sigmar One: CSS class (for titles) */
+.sigmar-one-regular {
+  font-family: 'Sigmar One', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 body {
   font-size: 14px;
   line-height: 1.45;
@@ -76,12 +82,12 @@ body {
   color: var(--color-text);
 }
 
-/* Ensure all basic form inputs inherit our Roboto stack */
+/* Ensure all basic form inputs inherit our Red Hat Text stack */
 input,
 textarea,
 select,
 button {
-  font-family: var(--font-sans, 'Roboto', 'Inter', ui-sans-serif, system-ui, sans-serif);
+  font-family: var(--font-sans, 'Red Hat Text', 'Inter', ui-sans-serif, system-ui, sans-serif);
   font-variation-settings: 'wght' 400;
 }
 
@@ -295,7 +301,7 @@ html[data-theme='dark'] .tbtn {
 }
 
 .font-transcript {
-  font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+  font-family: 'Red Hat Text', 'Inter', system-ui, sans-serif;
   font-variation-settings: 'wght' 400;
 }
 
@@ -351,7 +357,7 @@ html[data-theme='dark'] .transcript-body {
 
 /* 11. Summary output rich formatting */
 .summary-body {
-  font-family: 'Roboto', 'Inter', system-ui, sans-serif;
+  font-family: 'Red Hat Text', 'Inter', system-ui, sans-serif;
   font-size: 0.875rem; /* 14px */
   line-height: 1.55;
   color: var(--color-text);
@@ -562,6 +568,47 @@ html[data-theme='dark'] .panel-toggle {
 
 /* 16. Component overrides: Select (DaisyUI) */
 @layer components {
+  /* Text inputs: ensure tokenized surface/text/border + focus ring */
+  .input {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
+    outline: none;
+    box-shadow: none;
+  }
+
+  .input:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .input:focus,
+  .input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+    border-color: var(--color-primary);
+  }
+
+  .input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .input:disabled,
+  .input[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Bordered variant parity */
+  .input.input-bordered {
+    border-color: var(--color-border);
+  }
+
+  /* Normalize search appearance */
+  input[type='search'].input {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
   /* Ensure selects use our tokenized surface/text/border + focus ring */
   .select {
     background-color: var(--color-surface);

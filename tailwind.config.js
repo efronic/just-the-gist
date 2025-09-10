@@ -7,8 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        brand: ['Sigmar One', 'Red Hat Text', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         sans: [
-          'Roboto',
+          'Red Hat Text',
           'Inter',
           'ui-sans-serif',
           'system-ui',

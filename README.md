@@ -11,11 +11,11 @@ A minimal Chrome/Edge extension that summarizes the current page (and any detect
 
 ## Setup
 
-1) Get a Google Gemini API key from Google AI Studio: https://aistudio.google.com/app/apikey
+1. Get a Google Gemini API key from Google AI Studio: https://aistudio.google.com/app/apikey
 
-2) In the extension Options page, paste your API key and pick a model (default: gemini-2.5-flash).
+2. In the extension Options page, paste your API key and pick a model (default: gemini-2.5-flash).
 
-3) Load the extension in Chrome/Edge:
+3. Load the extension in Chrome/Edge:
    - Navigate to chrome://extensions (or edge://extensions)
    - Enable Developer mode
    - Click "Load unpacked" and select this folder
@@ -49,3 +49,7 @@ A minimal Chrome/Edge extension that summarizes the current page (and any detect
 ## License
 
 MIT
+
+## Typography
+
+The default sans-serif font is Red Hat Text. It's loaded via Google Fonts in `src/popup.html` and `src/options.html` and configured in `tailwind.config.js`. If you swap fonts, update `fontFamily.sans` and any explicit `font-family` declarations in `src/styles/design-system.scss`.
