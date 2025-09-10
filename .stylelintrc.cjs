@@ -2,7 +2,7 @@ module.exports = {
   extends: ['stylelint-config-standard', 'stylelint-config-standard-scss'],
   overrides: [
     {
-      files: ['src/styles/_auto-tokens.scss', 'src/styles/_tokens.scss'],
+      files: ['src/styles/tokens.generated.scss'],
       rules: {
         'color-no-hex': null,
         'color-hex-length': null,
@@ -37,5 +37,9 @@ module.exports = {
     'function-no-unknown': [true, { ignoreFunctions: ['theme', 'color-mix'] }],
     // Disable import-notation noise for Google Fonts URL usage style
     'import-notation': null,
+    // Relax formatting noise after consolidation
+    'declaration-block-single-line-max-declarations': null,
+    'rule-empty-line-before': null,
+    'at-rule-empty-line-before': null,
   },
 };

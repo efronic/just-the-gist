@@ -3,6 +3,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { emitScssTokens } from './design-tokens.mjs';
+import os from 'node:os';
 
 const root = path.resolve(process.cwd());
 const dist = path.join(root, 'dist');
@@ -43,11 +44,29 @@ function compileTailwind() {
   const input = path.join(root, 'src/styles/design-system.scss');
   const output = path.join(root, 'dist/tailwind.css');
   if (!fs.existsSync(input)) return;
-  // Generate auto token file consumed by design-system.scss (optional import spot)
-  const autoTokenPath = path.join(root, 'src/styles/_auto-tokens.scss');
-  emitScssTokens(autoTokenPath, fs);
+  // Generate consolidated token file consumed by design-system.scss
+  const generatedTokenPath = path.join(root, 'src/styles/tokens.generated.scss');
+  emitScssTokens(generatedTokenPath, fs);
   try {
-    execSync(`npx tailwindcss -i "${input}" -o "${output}" --minify`, { stdio: 'inherit' });
+    // Clean up any leftovers from prior versions that compiled into dist
+    const oldPre = path.join(root, 'dist/__pre-tailwind.css');
+    const oldPreMap = path.join(root, 'dist/__pre-tailwind.css.map');
+    try {
+      fs.unlinkSync(oldPre);
+    } catch {}
+    try {
+      fs.unlinkSync(oldPreMap);
+    } catch {}
+
+    // Precompile SCSS to a temporary CSS file outside of dist so Chrome doesn't choke on
+    // reserved leading-underscore filenames inside the extension directory. Disable source maps.
+    const precompiled = path.join(os.tmpdir(), 'justthegist_pre_tailwind.css');
+    execSync(`npx sass "${input}" "${precompiled}" --no-source-map`, { stdio: 'inherit' });
+    execSync(`npx tailwindcss -i "${precompiled}" -o "${output}" --minify`, { stdio: 'inherit' });
+    // Cleanup temp file (best-effort)
+    try {
+      fs.unlinkSync(precompiled);
+    } catch {}
   } catch (err) {
     console.warn(
       '[build] Tailwind (SCSS) compile failed. Did you run npm install?\n',

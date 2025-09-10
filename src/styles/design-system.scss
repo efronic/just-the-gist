@@ -1,17 +1,67 @@
-/* Roboto variable font import (weight+ital axes) */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-@use 'tokens' as *;
-@use 'mixins' as *;
-@use 'typography';
-@use 'components';
-@import 'auto-tokens';
+/* =====================================================================
+   Design System Entry (Consolidated - Option A)
+   Only human-authored stylesheet. Tokens live in tokens.generated.scss.
+   ===================================================================== */
 
-/* Tailwind layers (still using Tailwind utilities) */
+/* 1. Font import */
+@use 'tokens.generated' as *;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* 2. Generated tokens (raw hex + theme vars) */
+
+/* 3. Inline mixins (from former _mixins.scss) */
+@mixin focus-ring($prop: box-shadow) {
+  outline: none;
+  &:focus-visible {
+    #{$prop}: 0 0 0 2px var(--color-focus-ring);
+  }
+}
+
+@mixin btn-base($bg, $bg-hover, $bg-active, $fg) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem;
+  background: $bg;
+  color: $fg;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+  &:hover {
+    background: $bg-hover;
+  }
+  &:active {
+    background: $bg-active;
+  }
+  @include focus-ring;
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin btn-outline($color, $hover-bg, $hover-fg) {
+  background: transparent;
+  color: $color;
+  border-color: $color;
+  &:hover {
+    background: $hover-bg;
+    color: $hover-fg;
+  }
+}
+
+/* 4. Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Base adjustments formerly in tailwind.css */
+/* 5. Base + Typography (merged) */
 body,
 .font-sans {
   font-feature-settings:
@@ -41,15 +91,125 @@ code {
   font-size: 12px;
 }
 
+/* 6. Component: Card / Badge / Input / Buttons (from _components.scss) */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.2s ease;
+  &--interactive {
+    cursor: pointer;
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+  }
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.25rem 0.4rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-accent-fg);
+  &--outline {
+    background: transparent;
+    border: 1px solid var(--color-accent);
+  }
+  &--primary {
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+  }
+  &--secondary {
+    background: var(--color-secondary);
+    color: var(--color-secondary-fg);
+  }
+}
+.input-token {
+  display: inline-flex;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--color-text);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+    border-color: var(--color-primary);
+  }
+  &::placeholder {
+    color: var(--color-text-faint);
+  }
+  &--sm {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.6875rem;
+  }
+  &--lg {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+.gbtn {
+  @include btn-base(
+    var(--color-primary),
+    var(--color-primary-hover),
+    var(--color-primary-active),
+    var(--color-primary-fg)
+  );
+}
+.gbtn-secondary {
+  @include btn-base(
+    var(--color-secondary),
+    var(--color-secondary-hover),
+    var(--color-secondary-active),
+    var(--color-secondary-fg)
+  );
+}
+.gbtn-accent {
+  @include btn-base(
+    var(--color-accent),
+    var(--color-accent-hover),
+    var(--color-accent-active),
+    var(--color-accent-fg)
+  );
+}
+.gbtn-outline {
+  @include btn-base(
+    transparent,
+    var(--color-primary-hover),
+    var(--color-primary-active),
+    var(--color-primary)
+  );
+  @include btn-outline(var(--color-primary), var(--color-primary), var(--color-primary-fg));
+}
+
+/* 7. Transcript preview adjustments */
 #transcriptPreview p {
   line-height: 1.4;
 }
-
 #transcriptPreview p:last-child {
   margin-bottom: 0 !important;
 }
 
-/* Transcript toolbar sizing adjustments */
+/* 8. Transcript toolbar sizing */
 #transcriptToolbar {
   min-height: 3rem; /* taller bar */
   padding-top: 0.5rem !important;
@@ -94,7 +254,7 @@ html[data-theme='dark'] body {
   background-color: var(--color-bg);
 }
 
-/* Transcript toolbar icon button */
+/* 9. Transcript toolbar button */
 .tbtn {
   display: inline-flex;
   align-items: center;
@@ -139,7 +299,7 @@ html[data-theme='dark'] .tbtn {
   font-variation-settings: 'wght' 400;
 }
 
-/* Transcript rich formatting */
+/* 10. Transcript rich formatting */
 .transcript-body .tpara {
   margin-bottom: 1rem !important;
 }
@@ -189,7 +349,7 @@ html[data-theme='dark'] .transcript-body {
   color: var(--color-text);
 }
 
-/* Summary output rich formatting */
+/* 11. Summary output rich formatting */
 .summary-body {
   font-family: 'Roboto', 'Inter', system-ui, sans-serif;
   font-size: 0.875rem; /* 14px */
@@ -303,49 +463,42 @@ html[data-theme='dark'] #transcriptToolbar {
   background-color: rgba(40, 49, 45, 0.7);
 }
 
-/* (Removed legacy .summarize-btn mapping; use btn btn-primary directly in markup.) */
-
-/* Utility helpers bridging to tokens */
-.border-token {
-  border-color: var(--color-border);
+/* 12. Utilities (bridging to tokens) */
+@layer utilities {
+  .border-token {
+    border-color: var(--color-border);
+  }
+  .bg-surface {
+    background: var(--color-surface);
+  }
+  .bg-surface-alt {
+    background: var(--color-surface-alt);
+  }
+  .bg-surface-translucent {
+    background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .text-soft {
+    color: var(--color-text-soft);
+  }
+  .text-faint {
+    color: var(--color-text-faint);
+  }
+  .text-token-text {
+    color: var(--color-text);
+  }
+  .text-token-text-soft {
+    color: var(--color-text-soft);
+  }
+  .text-token-text-faint {
+    color: var(--color-text-faint);
+  }
+  .text-token-on-primary {
+    color: var(--color-primary-fg);
+  }
 }
 
-.bg-surface {
-  background: var(--color-surface);
-}
-
-.bg-surface-alt {
-  background: var(--color-surface-alt);
-}
-
-.bg-surface-translucent {
-  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-  backdrop-filter: blur(6px);
-}
-
-.text-soft {
-  color: var(--color-text-soft);
-}
-
-.text-faint {
-  color: var(--color-text-faint);
-}
-
-/* New semantic text + border utilities replacing Tailwind slate/white usages */
-.text-token-text {
-  color: var(--color-text);
-}
-.text-token-text-soft {
-  color: var(--color-text-soft);
-}
-.text-token-text-faint {
-  color: var(--color-text-faint);
-}
-.text-token-on-primary {
-  color: var(--color-primary-fg);
-}
-
-/* Tabs override using CSS vars */
+/* 13. Tabs override */
 .tabs .tab-active {
   background: var(--color-primary);
   color: var(--color-primary-fg);
@@ -353,7 +506,7 @@ html[data-theme='dark'] #transcriptToolbar {
 
 /* (Former .gist-tabs styles removed – using button-based panels now) */
 
-/* Panel toggle buttons (Summary / Transcript) */
+/* 14. Panel toggle buttons */
 .panel-toggle {
   @include focus-ring;
 
@@ -403,3 +556,6 @@ html[data-theme='dark'] .panel-toggle {
 }
 
 /* (Removed legacy custom dropdown + menu styles; native <select class="select"> now handles Mode/Detail) */
+
+/* 15. Future extension placeholder */
+// @layer components { }
