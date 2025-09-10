@@ -165,6 +165,56 @@ interface TranscriptCacheEntry {
   truncated?: boolean;
 }
 
+// --- Summary persistence ---
+interface SummaryCacheEntry {
+  text: string;
+  raw?: any;
+  savedAt: number;
+}
+
+const buildSummaryKey = (url?: string | null): string | null => {
+  if (!url) return null;
+  const vid = extractVideoIdFromUrl(url);
+  if (vid) return `summary_yt_${vid}`;
+  try {
+    const u = new URL(url);
+    return `summary_page_${u.origin}${u.pathname}`;
+  } catch { return `summary_page_${url}`; }
+};
+
+const saveSummaryForUrl = async (url?: string | null, entry?: { text?: string; raw?: any; }): Promise<void> => {
+  if (!url || !entry?.text) return;
+  const key = buildSummaryKey(url);
+  if (!key) return;
+  try {
+    let raw: any = undefined;
+    const src = entry.raw;
+    if (src && typeof src === 'object' && !Array.isArray(src)) {
+      try {
+        raw = { ...src };
+        if (raw?.extract?.video?.cues) {
+          raw.extract = { ...raw.extract, video: { ...raw.extract.video } };
+          delete raw.extract.video.cues;
+        }
+        const test = JSON.stringify(raw);
+        if (test.length > 300_000) raw = undefined;
+      } catch { raw = undefined; }
+    }
+    const payload: SummaryCacheEntry = { text: String(entry.text), raw, savedAt: Date.now() };
+    await chrome.storage.local.set({ [key]: payload });
+  } catch { /* ignore */ }
+};
+
+const loadSummaryForUrl = async (url?: string | null): Promise<SummaryCacheEntry | undefined> => {
+  if (!url) return undefined;
+  const key = buildSummaryKey(url);
+  if (!key) return undefined;
+  try {
+    const store = await chrome.storage.local.get(key);
+    return store[key] as SummaryCacheEntry | undefined;
+  } catch { return undefined; }
+};
+
 const extractVideoIdFromUrl = (url?: string | null): string | null => {
   if (!url) return null;
   try {
@@ -279,6 +329,31 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
 
 const init = async () => {
   const tab = await getActiveTab();
+  // Attempt to restore previously saved summary for this tab
+  try {
+    const saved = await loadSummaryForUrl(tab?.url);
+    if (saved?.text) {
+      setOutput(saved.text);
+      const existing = document.getElementById('rawDetails');
+      if (saved.raw && !existing) {
+        const outputEl = document.getElementById('output');
+        if (outputEl) {
+          const details = document.createElement('details');
+          details.id = 'rawDetails';
+          details.className = 'mt-2 text-[10px]';
+          const summary = document.createElement('summary');
+          summary.textContent = 'Show raw data';
+          summary.className = 'cursor-pointer select-none text-primary hover:underline font-medium';
+          const pre = document.createElement('pre');
+          pre.className = 'mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-2';
+          try { pre.textContent = JSON.stringify(saved.raw, null, 2); } catch { /* ignore */ }
+          details.appendChild(summary);
+          details.appendChild(pre);
+          outputEl.insertAdjacentElement('afterend', details);
+        }
+      }
+    }
+  } catch { /* ignore */ }
   const urlEl = document.getElementById('url');
   if (urlEl instanceof HTMLInputElement) {
     urlEl.value = tab?.url || '';
@@ -515,6 +590,12 @@ const init = async () => {
           }
         }
         setOutput(summaryText);
+
+        // Persist summary and compact raw for this tab URL
+        try {
+          const currentTab = await getActiveTab();
+          await saveSummaryForUrl(currentTab?.url, { text: summaryText, raw: result });
+        } catch { /* ignore */ }
 
         // Attach raw JSON viewer (on demand) below output if structured object
         if (result && typeof result === 'object') {
