@@ -71,6 +71,46 @@ const handleSummarizeRequest = async ({ tabId, mode, detailLevel }: { tabId: num
   }
   if (!extract) throw new Error('No extraction result.');
 
+  // 1b) If a YouTube transcript was previously fetched and cached, prefer it
+  try {
+    const video = extract.video as any;
+    if (video && video.hasVideo) {
+      const vid = video.videoId || (() => {
+        try {
+          const u = new URL(video.pageUrl || extract.url || '');
+          if (/youtube\.com$/.test(u.hostname) && u.pathname === '/watch') return u.searchParams.get('v');
+          if (/youtu\.be$/.test(u.hostname)) { const id = u.pathname.slice(1); if (id) return id; }
+        } catch { }
+        return undefined;
+      })();
+      if (vid) {
+        const key = `yt_transcript_${vid}`;
+        try {
+          const store = await chrome.storage.local.get(key);
+          const cached = store?.[key] as { cues?: Array<{ text: string; startTime: number; endTime: number; }>; lang?: string; truncated?: boolean; } | undefined;
+          if (cached?.cues?.length) {
+            // Adopt cached cues if they improve coverage
+            const existingCount = Array.isArray(video.cues) ? video.cues.length : 0;
+            if (cached.cues.length > existingCount) {
+              const v = (extract.video as any) || {};
+              extract = {
+                ...extract,
+                video: {
+                  ...v,
+                  hasVideo: true,
+                  cues: cached.cues,
+                  transcriptSource: 'fetched',
+                  transcriptLanguage: cached.lang || v.transcriptLanguage,
+                  transcriptTruncated: !!cached.truncated,
+                } as any
+              } as ExtractedPage;
+            }
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  } catch { /* ignore */ }
+
   // 2) Load API config
   const { GEMINI_API_KEY, GEMINI_MODEL } = await chrome.storage.sync.get({
     GEMINI_API_KEY: '',

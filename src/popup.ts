@@ -125,20 +125,24 @@ const formatSummary = (raw: string): string => {
 
 const setOutput = (text?: string) => {
   const el = document.getElementById('output') as HTMLElement | null;
+  const placeholder = document.getElementById('summaryPlaceholder');
   if (!el) return;
   const content = text?.trim() || '';
   if (content) {
     el.innerHTML = formatSummary(content);
     el.classList.remove('hidden');
+    placeholder && placeholder.classList.add('hidden');
   } else {
     el.innerHTML = '';
     el.classList.add('hidden');
+    placeholder && placeholder.classList.remove('hidden');
   }
   updateScrollState();
 };
 
 import type { SummarizeMode } from './types/extract';
 import { SUMMARIZE_MODE } from './types/extract';
+import { getYouTubeVideoId as parseYtVideoId } from './yt/captions.js';
 
 const summarize = async (mode: SummarizeMode, detailLevel: string) => {
   const tab = await getActiveTab();
@@ -230,6 +234,70 @@ const extractVideoIdFromUrl = (url?: string | null): string | null => {
   return null;
 };
 
+// Ensure transcript is available in local cache for the current URL; fetch via content script if missing, then render
+const ensureTranscriptAvailable = async (url?: string | null): Promise<void> => {
+  const activeTab = await getActiveTab();
+  const tabId = activeTab?.id;
+  const vidFromUrl = (url ? parseYtVideoId(url) : null) || extractVideoIdFromUrl(url);
+  const container = document.getElementById('transcriptContainer');
+  const placeholder = document.getElementById('transcriptPlaceholder');
+  if (!tabId) {
+    container?.classList.add('hidden');
+    placeholder?.classList.remove('hidden');
+    return;
+  }
+
+  // If we already have a cache key guess and it's populated, render directly
+  if (vidFromUrl) {
+    const key = `yt_transcript_${vidFromUrl}`;
+    try {
+      const store = await chrome.storage.local.get(key);
+      const cached = store?.[key] as (StoredTranscript | undefined);
+      if (cached?.cues?.length) {
+        await loadTranscriptIntoPopup(url || undefined);
+        return;
+      }
+    } catch { /* ignore */ }
+  }
+
+  // Not cached – ask the content script to extract (it will also try to fetch YT captions if needed)
+  try {
+    setStatus('Fetching transcript...');
+    let extract: any | undefined;
+    try {
+      extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode: SUMMARIZE_MODE.video });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/Receiving end does not exist|Could not establish connection/i.test(msg)) {
+        // Inject content script then retry once
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['contentScript.js'] });
+        try {
+          extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode: SUMMARIZE_MODE.video });
+        } catch {
+          // Soft retry after short delay
+          await new Promise(r => setTimeout(r, 120));
+          await chrome.scripting.executeScript({ target: { tabId }, files: ['contentScript.js'] });
+          extract = await chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE', mode: SUMMARIZE_MODE.video });
+        }
+      } else {
+        throw err;
+      }
+    }
+    if (extract && extract.video && extract.video.hasVideo) {
+      const v = extract.video;
+      const videoId = v.videoId || parseYtVideoId(v.pageUrl || url || '') || vidFromUrl || undefined;
+      if (videoId && v.cues?.length) {
+        const key = `yt_transcript_${videoId}`;
+        try {
+          await chrome.storage.local.set({ [key]: { cues: v.cues, lang: v.transcriptLanguage, truncated: v.transcriptTruncated } });
+        } catch { /* ignore */ }
+      }
+    }
+  } catch { /* ignore */ }
+  setStatus('');
+  await loadTranscriptIntoPopup(url || undefined);
+};
+
 // Build rich HTML from cues
 const buildTranscriptHtml = (cues: StoredTranscript['cues'], opts: { showTs: boolean; compact: boolean; highlight?: string; }) => {
   if (!cues.length) return '';
@@ -279,9 +347,11 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
   const previewEl = document.getElementById('transcriptPreview');
   const contentEl = document.getElementById('transcriptContent');
   const metaEl = document.getElementById('transcriptMeta');
+  const placeholder = document.getElementById('transcriptPlaceholder');
   if (!container || !previewEl || !metaEl) return;
   if (!vid) {
     container.classList.add('hidden');
+    placeholder && placeholder.classList.remove('hidden');
     return;
   }
   const key = `yt_transcript_${vid}`;
@@ -290,8 +360,10 @@ const loadTranscriptIntoPopup = async (tabUrl?: string) => {
     const entry: StoredTranscript | undefined = store[key];
     if (!entry || !entry.cues?.length) {
       container.classList.add('hidden');
+      placeholder && placeholder.classList.remove('hidden');
       return;
     }
+    placeholder && placeholder.classList.add('hidden');
     const fullText = entry.cues.map(c => c.text).join(' ');
     // Render as rich paragraphs using button toggle state (aria-pressed)
     const showTsBtn = document.getElementById('tbToggleTs');
@@ -446,11 +518,11 @@ const init = async () => {
 
   const maybeLoadTranscript = async () => {
     if (!transcriptLoadedFlag && SHOW_TRANSCRIPT_PANEL !== false) {
-      await loadTranscriptIntoPopup(tab?.url);
+      await ensureTranscriptAvailable(tab?.url);
       transcriptLoadedFlag = true;
       const container = document.getElementById('transcriptContainer');
-      const noMsg = document.getElementById('noTranscriptMsg');
-      if (container && container.classList.contains('hidden') && noMsg) noMsg.classList.remove('hidden');
+      const placeholder = document.getElementById('transcriptPlaceholder');
+      if (container && container.classList.contains('hidden') && placeholder) placeholder.classList.remove('hidden');
     }
   };
 
@@ -459,7 +531,17 @@ const init = async () => {
   });
   transcriptBtn?.addEventListener('click', async () => {
     setActive('transcript');
-    await maybeLoadTranscript();
+    // Show spinner on the Transcript button while fetching
+    const btn = transcriptBtn as HTMLButtonElement;
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading loading-spinner loading-xs mr-1"></span>Transcript';
+    try {
+      await maybeLoadTranscript();
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
   });
 
   // Mode selection enable logic for native select

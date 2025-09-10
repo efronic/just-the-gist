@@ -138,6 +138,12 @@
             id="output"
             class="hidden flex-1 min-h-0 overflow-auto rounded-md border border-token bg-surface-alt dark:bg-surface-alt p-4 text-[13px] leading-relaxed summary-body"
           ></div>
+          <!-- Summary placeholder card -->
+          <div id="summaryPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
+            <div class="card-body p-4 text-center">
+              <p class="text-[12px] text-token-text-faint">No summary available</p>
+            </div>
+          </div>
       </div>
               <!-- Transcript Panel -->
   <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">
@@ -297,7 +303,12 @@
           </div>
           <div id="transcriptMeta" class="text-[11px] text-token-text-faint mt-1"></div>
         </div>
-  <div id="noTranscriptMsg" class="text-[11px] text-token-text-faint hidden">No transcript available for this page/video.</div>
+        <!-- Transcript placeholder card -->
+        <div id="transcriptPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
+          <div class="card-body p-4 text-center">
+            <p class="text-[12px] text-token-text-faint">No transcript available. For non-video pages, a transcript may not exist.</p>
+          </div>
+        </div>
       </div>
       </div>
 
