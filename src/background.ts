@@ -17,7 +17,8 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== 'justthegist') return;
   if (!tab || !tab.id) return;
-  await handleSummarizeRequest({ tabId: tab.id, mode: SUMMARIZE_MODE.auto, detailLevel: 'standard' });
+  // Pass empty detailLevel to allow handleSummarizeRequest to use stored DEFAULT
+  await handleSummarizeRequest({ tabId: tab.id, mode: SUMMARIZE_MODE.auto, detailLevel: '' as any });
 });
 
 chrome.runtime.onMessage.addListener((msg: unknown, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {

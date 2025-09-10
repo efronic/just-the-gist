@@ -452,6 +452,11 @@ const init = async () => {
 
   // Mode select is now static in markup (default Auto)
   const modeSelect = document.getElementById('mode') as HTMLSelectElement;
+  // Initialize detail level dropdown from saved option
+  const detailLevelSelect = document.getElementById('detailLevelSelect') as HTMLSelectElement | null;
+  if (detailLevelSelect) {
+    detailLevelSelect.value = (DETAIL_LEVEL || 'standard').trim();
+  }
   const apiSection = document.getElementById('apiSection') as HTMLElement;
   const summarizeBtn = document.getElementById('summarizeBtn') as HTMLButtonElement; // legacy variable name retained for existing click handler logic
   const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement | null;
