@@ -1,5 +1,5 @@
 /// <reference types="chrome" />
-import { callGemini } from './gemini';
+import { callGeminiRaw } from './gemini';
 import type { ExtractedPage, SummarizeMode } from './types/extract';
 import { SUMMARIZE_MODE } from './types/extract';
 import type { InboundRuntimeMessage, SummarizeTabRequest } from './types/messages';
@@ -129,13 +129,55 @@ const handleSummarizeRequest = async ({ tabId, mode, detailLevel }: { tabId: num
   const prompt = buildPrompt(extract, mode, effectiveDetail);
 
   // 4) Call Gemini
-  const text = await callGemini({
+  // Adjust token budget based on requested detail level to reduce truncation & empty candidate edge cases.
+  const maxTokensByDetail: Record<string, number> = {
+    concise: 700,
+    standard: 1200,
+    detailed: 3800,
+    expanded: 4500
+  };
+  let { text, finishReason } = await callGeminiRaw({
     apiKey: GEMINI_API_KEY,
     model: GEMINI_MODEL,
-    input: prompt
+    input: prompt,
+    maxOutputTokens: maxTokensByDetail[effectiveDetail] || 2048
   });
 
-  return { text, extract } as const;
+  const looksTruncated = (t: string) => /[,;:]\s*$/.test(t) || /\b(and|including|with|as|while|but)$/i.test(t.trim());
+  let attempts = 0;
+  // If model stopped early due to length or heuristic suggests truncation, attempt continuation.
+  while (attempts < 2 && (finishReason === 'MAX_TOKENS' || looksTruncated(text))) {
+    attempts++;
+    // Provide last ~400 chars as context and ask to continue.
+    const tail = text.slice(-400);
+    const continuationPrompt = `${prompt}\n\nThe previous answer appears truncated. Continue seamlessly from where this partial ends (do NOT repeat earlier content). Partial tail:\n"""${tail}"""\nContinue:`;
+    const cont = await callGeminiRaw({
+      apiKey: GEMINI_API_KEY,
+      model: GEMINI_MODEL,
+      input: continuationPrompt,
+      maxOutputTokens: (maxTokensByDetail[effectiveDetail] || 2048) - 100 // reserve; simple heuristic
+    });
+    if (cont.text) {
+      // Avoid duplicating if model reprinted part of the tail: trim overlap by finding longest suffix of current that is prefix of addition.
+      let addition = cont.text.trimStart();
+      const overlapLen = (() => {
+        const base = text.slice(-300);
+        for (let i = Math.min(base.length, addition.length); i > 40; i -= 10) { // coarse search
+          const chunk = base.slice(base.length - i);
+          if (addition.startsWith(chunk)) return i;
+        }
+        return 0;
+      })();
+      if (overlapLen > 0) addition = addition.slice(overlapLen);
+      text += (text.endsWith('\n') ? '' : '\n') + addition;
+      finishReason = cont.finishReason;
+      if (!(finishReason === 'MAX_TOKENS') && !looksTruncated(text)) break;
+    } else {
+      break; // no progress
+    }
+  }
+
+  return { text, extract, continued: attempts > 0, attempts } as const;
 };
 
 const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: string) => {
@@ -199,7 +241,7 @@ const buildPrompt = (extract: ExtractedPage, mode: SummarizeMode, detailLevel: s
   const detailNote = `Detail level: ${detailLevel}`;
   const adaptiveBlock = `\n\nCONTENT TYPE CLASSIFICATION: ${contentType.toUpperCase()}\nAdaptive Guidance:\n${adaptiveGuidance[contentType]}\nAction Item Rules:\n- Provide ONLY if content type supports them (tutorial, meeting, academic (future work), general when explicit).\n- For entertainment: explicitly state no action items and do not fabricate.`;
 
-  const task = `\n\nTask Instructions:\n${styleInstructions[detailLevel] || styleInstructions.standard}\n\nGlobal rules:\n- If transcript cues are present, treat them as primary source; page text supplements missing context.\n- Do not invent specifics not supported by cues or page.\n- If transcript source is 'none', state that and rely on page text only.\n- If transcript truncated or limited, note potential missing later content.\n- Preserve important proper nouns.\n- Avoid marketing fluff; keep factual.\n- Respect adaptive guidance and action item rules.`;
+  const task = `\n\nTask Instructions:\n${styleInstructions[detailLevel] || styleInstructions.standard}\n\nGlobal rules:\n- If transcript cues are present, treat them as primary source; page text supplements missing context.\n- Do not invent specifics not supported by cues or page.\n- If transcript source is 'none', state that and rely on page text only.\n- If transcript truncated or limited, note potential missing later content.\n- Preserve important proper nouns.\n- Avoid marketing fluff; keep factual.\n- Do NOT reproduce long verbatim passages; summarize in original wording (prevents recitation blocks).\n- Respect adaptive guidance and action item rules.`;
 
   return `${header}\n${detailNote}${cuesBlock}${contentBlock}${adaptiveBlock}${task}`;
 };

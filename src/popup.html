@@ -42,44 +42,12 @@
         </button>
       </div>
     </header>
-    <!-- Tab Buttons Replacement -->
-  <div class="px-3 pt-2">
-      <div class="flex gap-2 items-start">
-        <button id="btnSummary" class="panel-toggle" aria-pressed="true">Summary</button>
-        <button id="btnTranscript" class="panel-toggle" aria-pressed="false">Transcript</button>
-      </div>
-    </div>
-  <div class="px-3 my-2 flex-1 min-h-0 flex flex-col overflow-hidden" id="panelsWrapper">
-      <!-- Summary Panel -->
-  <div id="summaryTabPanel" class="p-4 bg-surface rounded-md border border-token flex-1 min-h-0 overflow-hidden flex flex-col">
-        <div id="summaryTab" class="">
-          <div id="apiSection" class="space-y-2" style="display: none">
-            <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-token-text"
-              >Google Gemini API key</label
-            >
-            <input
-              id="apiKey"
-              type="password"
-              placeholder="AIza..."
-              class="w-full rounded-md border border-token bg-surface px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
-            />
-            <div class="flex items-center gap-2 mt-1">
-              <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">
-                Save API settings
-              </button>
-              <span id="apiStatus" class="text-[10px] text-token-text-soft"></span>
-            </div>
-            <div class="text-[10px] text-token-text-soft break-all">
-              You can also manage this in
-              <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
-            </div>
-          </div>
-          <!-- URL Input with inline copy (flex group) -->
-          <div>
-            
-            <div
-              class="flex items-stretch rounded-md border border-token bg-surface focus-within:ring-1 focus-within:ring-primary focus-within:border-primary mb-4"
-            >
+    <!-- New top utility bar with URL and tab buttons -->
+    <div class="px-3 pt-2">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-stretch gap-2">
+          <div class="flex-1">
+            <div class="flex items-stretch rounded-md border border-token bg-surface focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
               <input
                 id="url"
                 type="text"
@@ -107,7 +75,38 @@
               </button>
             </div>
           </div>
-          <!-- Controls (Mode / Detail / Summarize) inline -->
+          <div class="flex items-start gap-2">
+            <button id="btnSummary" class="panel-toggle" aria-pressed="true">Summary</button>
+            <button id="btnTranscript" class="panel-toggle" aria-pressed="false">Transcript</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="px-3 my-2 flex-1 min-h-0 flex flex-col overflow-hidden" id="panelsWrapper">
+      <div id="summaryTabPanel" class="p-4 bg-surface rounded-md border border-token flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div id="summaryTab" class="">
+          <div id="apiSection" class="space-y-2" style="display: none">
+            <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-token-text"
+              >Google Gemini API key</label
+            >
+            <input
+              id="apiKey"
+              type="password"
+              placeholder="AIza..."
+              class="w-full rounded-md border border-token bg-surface px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
+            />
+            <div class="flex items-center gap-2 mt-1">
+              <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">
+                Save API settings
+              </button>
+              <span id="apiStatus" class="text-[10px] text-token-text-soft"></span>
+            </div>
+            <div class="text-[10px] text-token-text-soft break-all">
+              You can also manage this in
+              <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
+            </div>
+          </div>
+          <!-- Removed old URL bar location -->
           <div class="flex flex-col gap-2">
             <div class="flex items-start gap-2 mb-4">
               <!-- Mode select (default Auto) -->
@@ -135,18 +134,18 @@
               </div>
             </div>
           </div>
+        </div>
+        <div id="status" class="text-[10px] text-token-text-soft hidden"></div>
+        <div
+          id="output"
+          class="hidden flex-1 min-h-0 overflow-auto rounded-md border border-token bg-surface-alt dark:bg-surface-alt p-4 text-[13px] leading-relaxed summary-body"
+        ></div>
+        <!-- Summary placeholder card -->
+        <div id="summaryPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
+          <div class="card-body p-4 text-center">
+            <p class="text-[12px] text-token-text-faint">No summary available</p>
           </div>
-          <div id="status" class="text-[10px] text-token-text-soft hidden"></div>
-          <div
-            id="output"
-            class="hidden flex-1 min-h-0 overflow-auto rounded-md border border-token bg-surface-alt dark:bg-surface-alt p-4 text-[13px] leading-relaxed summary-body"
-          ></div>
-          <!-- Summary placeholder card -->
-          <div id="summaryPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
-            <div class="card-body p-4 text-center">
-              <p class="text-[12px] text-token-text-faint">No summary available</p>
-            </div>
-          </div>
+        </div>
       </div>
               <!-- Transcript Panel -->
   <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">

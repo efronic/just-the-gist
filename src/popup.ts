@@ -540,7 +540,8 @@ const init = async () => {
     const btn = transcriptBtn as HTMLButtonElement;
     const original = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="loading loading-spinner loading-xs mr-1"></span>Transcript';
+    // Updated spinner markup (DaisyUI default size)
+    btn.innerHTML = '<span class="loading loading-spinner mr-1"></span>Transcript';
     try {
       await maybeLoadTranscript();
     } finally {
@@ -657,9 +658,9 @@ const init = async () => {
       // Clear any prior status (we only show errors now)
       setStatus('');
       setOutput('');
-      // Show spinner only (no animated dots)
+      // Show spinner (DaisyUI default)
       let cancelled = false;
-      summarizeBtn.innerHTML = '<span class="loading loading-spinner loading-xs mr-1"></span>Summarizing';
+      summarizeBtn.innerHTML = '<span class="loading loading-spinner mr-1"></span>Summarizing';
 
       try {
         const result = await summarize(mode, detailLevel);
@@ -732,15 +733,12 @@ const init = async () => {
         }
       } finally {
         cancelled = true;
-        // Replace spinner with a check icon to indicate success
-        // Adaptive success icon using provided SVG concept (inverts colors based on button bg luminance)
         summarizeBtn.innerHTML = buildSuccessIcon(summarizeBtn) + '<span class="ml-1">Summarize</span>';
-        // After a short delay restore original label
         setTimeout(() => {
           if (!summarizeBtn.disabled) {
             summarizeBtn.innerHTML = originalLabel;
           } else {
-            summarizeBtn.innerHTML = originalLabel; // fallback
+            summarizeBtn.innerHTML = originalLabel;
           }
         }, 1200);
       }
