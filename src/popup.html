@@ -4,156 +4,71 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Just the Gist</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sigmar+One&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="tailwind.css" />
   </head>
   <body
-    class="w-[680px] h-[600px] overflow-hidden flex flex-col font-sans antialiased bg-surface text-token-text dark:text-token-text"
+    class="w-[680px] h-[600px] overflow-hidden flex flex-row font-sans antialiased bg-surface text-token-text dark:text-token-text"
   >
-    <header class="bg-primary px-3 py-4 flex items-center justify-between shadow-sm">
-  <h1 class="text-lg sigmar-one-regular tracking-tight text-token-on-primary">Just the Gist</h1>
-      <div class="flex items-center gap-2">
-        <button
-          id="themeToggle"
-          type="button"
-          class="btn btn-ghost text-token-on-primary"
-          title="Toggle theme"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            class="w-4 h-4"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path d="M14 24a10 10 0 0 0 10 10V14a10 10 0 0 0-10 10Z" />
-            <path
-              d="M24 2a22 22 0 1 0 22 22A21.9 21.9 0 0 0 24 2Zm18 22A18.1 18.1 0 0 1 24 42v-8a10 10 0 0 1 0-20V6A18.1 18.1 0 0 1 42 24Z"
-            />
-          </svg>
-        </button>
-  <button id="openOptions" type="button" class="btn btn-ghost text-token-on-primary" title="Options">
-          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11 3H13C13.5523 3 14 3.44772 14 4V4.56879C14 4.99659 14.2871 5.36825 14.6822 5.53228C15.0775 5.69638 15.5377 5.63384 15.8403 5.33123L16.2426 4.92891C16.6331 4.53838 17.2663 4.53838 17.6568 4.92891L19.071 6.34312C19.4616 6.73365 19.4615 7.36681 19.071 7.75734L18.6688 8.1596C18.3661 8.46223 18.3036 8.92247 18.4677 9.31774C18.6317 9.71287 19.0034 10 19.4313 10L20 10C20.5523 10 21 10.4477 21 11V13C21 13.5523 20.5523 14 20 14H19.4312C19.0034 14 18.6318 14.2871 18.4677 14.6822C18.3036 15.0775 18.3661 15.5377 18.6688 15.8403L19.071 16.2426C19.4616 16.6331 19.4616 17.2663 19.071 17.6568L17.6568 19.071C17.2663 19.4616 16.6331 19.4616 16.2426 19.071L15.8403 18.6688C15.5377 18.3661 15.0775 18.3036 14.6822 18.4677C14.2871 18.6318 14 19.0034 14 19.4312V20C14 20.5523 13.5523 21 13 21H11C10.4477 21 10 20.5523 10 20V19.4313C10 19.0034 9.71287 18.6317 9.31774 18.4677C8.92247 18.3036 8.46223 18.3661 8.1596 18.6688L7.75732 19.071C7.36679 19.4616 6.73363 19.4616 6.34311 19.071L4.92889 17.6568C4.53837 17.2663 4.53837 16.6331 4.92889 16.2426L5.33123 15.8403C5.63384 15.5377 5.69638 15.0775 5.53228 14.6822C5.36825 14.2871 4.99659 14 4.56879 14H4C3.44772 14 3 13.5523 3 13V11C3 10.4477 3.44772 10 4 10L4.56877 10C4.99658 10 5.36825 9.71288 5.53229 9.31776C5.6964 8.9225 5.63386 8.46229 5.33123 8.15966L4.92891 7.75734C4.53838 7.36681 4.53838 6.73365 4.92891 6.34313L6.34312 4.92891C6.73365 4.53839 7.36681 4.53839 7.75734 4.92891L8.15966 5.33123C8.46228 5.63386 8.9225 5.6964 9.31776 5.53229C9.71288 5.36825 10 4.99658 10 4.56876V4C10 3.44772 10.4477 3 11 3Z" />
-            <path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" />
-          </svg>
-        </button>
-      </div>
-    </header>
-    <!-- New top utility bar with URL and tab buttons -->
-    <div class="px-3 pt-2">
-      <div class="flex flex-col gap-2">
-        <div class="flex items-stretch gap-2">
-          <div class="flex-1">
-            <div class="flex items-stretch rounded-md border border-token bg-surface focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
-              <input
-                id="url"
-                type="text"
-                value=""
-                readonly
-                class="flex-1 bg-transparent border-0 px-3 py-2 text-[11px] text-token-text focus:outline-none focus:ring-0 font-sans"
-              />
-              <button
-                id="copyUrl"
-                type="button"
-                aria-label="Copy URL"
-                class="px-2 border-l border-token text-token-text-faint hover:text-token-text focus:outline-none flex items-center"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  class="w-4 h-4"
-                >
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="flex items-start gap-2">
-            <button id="btnSummary" class="panel-toggle" aria-pressed="true">Summary</button>
-            <button id="btnTranscript" class="panel-toggle" aria-pressed="false">Transcript</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="px-3 my-2 flex-1 min-h-0 flex flex-col overflow-hidden" id="panelsWrapper">
-      <div id="summaryTabPanel" class="p-4 bg-surface rounded-md border border-token flex-1 min-h-0 overflow-hidden flex flex-col">
-        <div id="summaryTab" class="">
-          <div id="apiSection" class="space-y-2" style="display: none">
-            <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-token-text"
-              >Google Gemini API key</label
-            >
-            <input
-              id="apiKey"
-              type="password"
-              placeholder="AIza..."
-              class="w-full rounded-md border border-token bg-surface px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
-            />
-            <div class="flex items-center gap-2 mt-1">
-              <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">
-                Save API settings
-              </button>
-              <span id="apiStatus" class="text-[10px] text-token-text-soft"></span>
-            </div>
-            <div class="text-[10px] text-token-text-soft break-all">
-              You can also manage this in
-              <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
-            </div>
-          </div>
-          <!-- Removed old URL bar location -->
-          <div class="flex flex-col gap-2">
-            <div class="flex items-start gap-2 mb-4">
-              <!-- Mode select (default Auto) -->
-              <div class="w-1/4 min-w-[105px]">
-                <label for="mode" class="sr-only">Mode</label>
-                <select id="mode" class="select select-bordered select-sm w-full">
-                  <option value="auto" selected>Auto</option>
-                  <option value="page">Page</option>
-                  <option value="video">Video</option>
-                </select>
-              </div>
-              <!-- Detail select (default Standard) -->
-              <div class="w-1/4 min-w-[115px]">
-                <label for="detailLevelSelect" class="sr-only">Detail level</label>
-                <select id="detailLevelSelect" class="select select-bordered select-sm w-full">
-                  <option value="concise">Concise</option>
-                  <option value="standard" selected>Standard</option>
-                  <option value="detailed">Detailed</option>
-                  <option value="expanded">Expanded</option>
-                </select>
-              </div>
-              <!-- Summarize Button (same height) -->
-              <div class="flex-1 min-w-[140px] flex">
-                <button id="summarizeBtn" class="btn btn-primary btn-sm w-full font-semibold tracking-tight shadow-sm">Summarize</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="status" class="text-[10px] text-token-text-soft hidden"></div>
+    <!-- Main content area (left) -->
+    <div class="flex-1 min-h-0 flex flex-col overflow-hidden" id="mainContent">
+      <div class="p-3 flex-1 min-h-0 flex flex-col overflow-hidden" id="panelsWrapper">
+        <!-- Summary Panel (fills body) -->
         <div
-          id="output"
-          class="hidden flex-1 min-h-0 overflow-auto rounded-md border border-token bg-surface-alt dark:bg-surface-alt p-4 text-[13px] leading-relaxed summary-body"
-        ></div>
-        <!-- Summary placeholder card -->
-        <div id="summaryPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
-          <div class="card-body p-4 text-center">
-            <p class="text-[12px] text-token-text-faint">No summary available</p>
+          id="summaryTabPanel"
+          class="p-4 bg-surface rounded-md border border-token flex-1 min-h-0 overflow-hidden flex flex-col"
+        >
+          <div id="summaryTab" class="">
+            <div id="apiSection" class="space-y-2" style="display: none">
+              <label for="apiKey" class="block text-[11px] font-semibold mt-1 text-token-text"
+                >Google Gemini API key</label
+              >
+              <input
+                id="apiKey"
+                type="password"
+                placeholder="AIza..."
+                class="w-full rounded-md border border-token bg-surface px-2.5 py-2 text-[11px] focus:border-primary focus:ring-primary"
+              />
+              <div class="flex items-center gap-2 mt-1">
+                <button id="saveApi" class="gbtn !px-3 !py-1.5 !text-[11px]">
+                  Save API settings
+                </button>
+                <span id="apiStatus" class="text-[10px] text-token-text-soft"></span>
+              </div>
+              <div class="text-[10px] text-token-text-soft break-all">
+                You can also manage this in
+                <a href="#" id="openOptions2" class="text-primary hover:underline">Options</a>.
+              </div>
+            </div>
+            <!-- Old URL/controls removed: controls moved into sidebar -->
+          </div>
+          <div id="status" class="text-[10px] text-token-text-soft hidden"></div>
+          <div
+            id="output"
+            class="hidden flex-1 min-h-0 overflow-auto rounded-md border border-token bg-surface-alt dark:bg-surface-alt p-4 text-[13px] leading-relaxed summary-body"
+          ></div>
+          <!-- Summary placeholder card -->
+          <div
+            id="summaryPlaceholder"
+            class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token"
+          >
+            <div class="card-body p-4 text-center">
+              <p class="text-[12px] text-token-text-faint">No summary available</p>
+            </div>
           </div>
         </div>
-      </div>
-              <!-- Transcript Panel -->
-  <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">
-    <div id="transcriptContainer" class="hidden flex-1 min-h-0">
-          <div
-            id="transcriptPreview"
+        <!-- Transcript Panel (fills body) -->
+        <div id="transcriptTabPanel" class="hidden flex-1 min-h-0 overflow-hidden">
+          <div id="transcriptContainer" class="hidden flex-1 min-h-0">
+            <div
+              id="transcriptPreview"
               class="relative flex-1 min-h-0 overflow-y-auto scroll-smooth rounded-md border border-token bg-surface-alt dark:bg-surface-alt pb-3 text-[14px] leading-relaxed font-transcript gist-scrollbar transcript-body"
-          >
+            >
               <div
                 id="transcriptToolbar"
                 class="sticky -top-px left-0 right-0 z-10 flex items-center gap-2 px-2 py-1.5 bg-surface-translucent border-b border-token"
@@ -301,21 +216,99 @@
                   />
                 </div>
               </div>
-            <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+              <div id="transcriptContent" class="space-y-0 px-3 pb-3 pt-2"></div>
+            </div>
+            <div id="transcriptMeta" class="text-[11px] text-token-text-faint mt-1"></div>
           </div>
-          <div id="transcriptMeta" class="text-[11px] text-token-text-faint mt-1"></div>
-        </div>
-        <!-- Transcript placeholder card -->
-        <div id="transcriptPlaceholder" class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token">
-          <div class="card-body p-4 text-center">
-            <p class="text-[12px] text-token-text-faint">No transcript available. For non-video pages, a transcript may not exist.</p>
+          <!-- Transcript placeholder card -->
+          <div
+            id="transcriptPlaceholder"
+            class="card bg-surface-alt shadow-sm mt-2 border border-dashed border-token"
+          >
+            <div class="card-body p-4 text-center">
+              <p class="text-[12px] text-token-text-faint">
+                No transcript available. For non-video pages, a transcript may not exist.
+              </p>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Right vertical sidebar -->
+  <aside id="sidebar" class="w-60 h-full border-l border-token bg-surface flex flex-col auto-hide">
+      <!-- Brand + theme -->
+      <div class="px-3 py-3 border-b border-token flex items-center justify-between sidebar-header">
+        <div class="sigmar-one-regular text-sm tracking-tight label">Just the Gist</div>
+        <button id="themeToggle" type="button" class="btn btn-ghost btn-xs" title="Toggle theme">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 48 48"
+            class="w-4 h-4"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M14 24a10 10 0 0 0 10 10V14a10 10 0 0 0-10 10Z" />
+            <path
+              d="M24 2a22 22 0 1 0 22 22A21.9 21.9 0 0 0 24 2Zm18 22A18.1 18.1 0 0 1 24 42v-8a10 10 0 0 1 0-20V6A18.1 18.1 0 0 1 42 24Z"
+            />
+          </svg>
+        </button>
       </div>
 
-    </div>
-  <!-- Removed unused main that caused extra vertical space -->
+      <!-- Nav buttons -->
+      <div class="p-3 space-y-2">
+        <button
+          id="navSummary"
+          class="btn btn-ghost btn-sm w-full justify-start"
+          aria-pressed="true"
+        >
+          <svg viewBox="0 0 24 24" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          <span class="label">Summary</span>
+        </button>
+        <!-- Summary config (expands under Summary) -->
+        <div id="summaryConfig" class="mt-2 space-y-2">
+          <div>
+            <label for="mode" class="block text-[11px] mb-1">Mode</label>
+            <select id="mode" class="select select-bordered select-sm w-full">
+              <option value="auto" selected>Auto</option>
+              <option value="page">Page</option>
+              <option value="video">Video</option>
+            </select>
+          </div>
+          <div>
+            <label for="detailLevelSelect" class="block text-[11px] mb-1">Detail level</label>
+            <select id="detailLevelSelect" class="select select-bordered select-sm w-full">
+              <option value="concise">Concise</option>
+              <option value="standard" selected>Standard</option>
+              <option value="detailed">Detailed</option>
+              <option value="expanded">Expanded</option>
+            </select>
+          </div>
+          <button id="summarizeBtn" class="btn btn-primary btn-sm w-full font-semibold tracking-tight shadow-sm">
+            <svg viewBox="0 0 24 24" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span class="label">Summarize</span>
+          </button>
+        </div>
+
+        <button
+          id="navTranscript"
+          class="btn btn-ghost btn-sm w-full justify-start"
+          aria-pressed="false"
+        >
+          <svg viewBox="0 0 24 24" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h16v10H7l-3 3V5z"/></svg>
+          <span class="label">Transcript</span>
+        </button>
+      </div>
+
+      <div class="mt-auto p-3 border-t border-token space-y-2">
+        <button id="navCopyUrl" class="btn btn-outline btn-sm w-full justify-start">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="label">Copy page URL</span>
+        </button>
+      </div>
+    </aside>
+
     <script type="module" src="popup.js"></script>
   </body>
 </html>

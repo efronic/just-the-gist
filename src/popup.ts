@@ -427,11 +427,13 @@ const init = async () => {
     }
   } catch { /* ignore */ }
   const urlEl = document.getElementById('url');
-  if (urlEl instanceof HTMLInputElement) {
-    urlEl.value = tab?.url || '';
-  } else if (urlEl) {
-    urlEl.textContent = tab?.url || '';
-  }
+  // URL field removed from UI; use Copy URL action instead via sidebar button.
+
+  // Options button (header removed) is optional now; keep handler if present
+  document.getElementById('openOptions')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
+  });
 
   document.getElementById('openOptions')!.addEventListener('click', (e) => {
     e.preventDefault();
@@ -500,8 +502,9 @@ const init = async () => {
   // --- Panel toggle setup (button-based) ---
   const summaryPanel = document.getElementById('summaryTabPanel');
   const transcriptPanel = document.getElementById('transcriptTabPanel');
-  const summaryBtn = document.getElementById('btnSummary') as HTMLButtonElement | null;
-  const transcriptBtn = document.getElementById('btnTranscript') as HTMLButtonElement | null;
+  const summaryBtn = document.getElementById('navSummary') as HTMLButtonElement | null;
+  const transcriptBtn = document.getElementById('navTranscript') as HTMLButtonElement | null;
+  const summaryConfig = document.getElementById('summaryConfig');
 
   const setActive = (which: 'summary' | 'transcript') => {
     const showSummary = which === 'summary';
@@ -516,9 +519,14 @@ const init = async () => {
       // Ensure transcript panel participates in flex sizing chain only when visible
       transcriptPanel?.classList.add('flex', 'flex-col');
     }
-    // Update aria-pressed only (styling handled via .panel-toggle CSS)
+    // Update aria-pressed on nav buttons
     summaryBtn?.setAttribute('aria-pressed', String(showSummary));
     transcriptBtn?.setAttribute('aria-pressed', String(!showSummary));
+    // Show summary config only when Summary tab selected
+    if (summaryConfig) {
+      if (showSummary) summaryConfig.classList.remove('hidden');
+      else summaryConfig.classList.add('hidden');
+    }
   };
 
   const maybeLoadTranscript = async () => {
@@ -770,18 +778,46 @@ const init = async () => {
 
   // Theme toggle
   const { THEME } = await chrome.storage.sync.get({ THEME: 'gistlight' });
-  const applyTheme = (t: string) => {
+  const applyTheme = (theme: string) => {
+    const t = theme === 'gistdark' || theme === 'dark' ? 'gistdark' : 'gistlight';
     document.documentElement.setAttribute('data-theme', t);
+    if (t === 'gistdark') {
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+    }
   };
   applyTheme(THEME);
   const themeToggleBtn = document.getElementById('themeToggle');
   themeToggleBtn?.addEventListener('click', async () => {
     try {
       const current = document.documentElement.getAttribute('data-theme') || 'gistlight';
-      const next = current === 'gistlight' ? 'dark' : 'gistlight';
+      const next = current === 'gistdark' ? 'gistlight' : 'gistdark';
       applyTheme(next);
       await chrome.storage.sync.set({ THEME: next });
     } catch {/* ignore */ }
+  });
+
+  // Sidebar auto-hide: enabled by default with CSS class present in markup. No toggle logic required now.
+
+  // Sidebar: Copy page URL
+  document.getElementById('navCopyUrl')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const t = await getActiveTab();
+      const url = t?.url || '';
+      if (!url) return;
+      const btn = e.currentTarget as HTMLButtonElement;
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading loading-spinner mr-1"></span>Copying…';
+      await navigator.clipboard.writeText(url);
+      btn.innerHTML = 'Copied!';
+      setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 900);
+    } catch {
+      setStatus('Copy failed');
+      setTimeout(() => setStatus(''), 1500);
+    }
   });
 
   // --- Dynamic transcript sizing ---

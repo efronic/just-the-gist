@@ -646,4 +646,39 @@ html[data-theme='dark'] .panel-toggle {
     color: var(--color-text);
     background-color: var(--color-surface);
   }
+
+  /* Sidebar: auto-hide behavior */
+  #sidebar {
+    transition: width 160ms ease;
+    will-change: width;
+  }
+  /* Collapsed rail width; expand on hover/focus-within */
+  #sidebar.auto-hide:not(:hover):not(:focus-within) {
+    width: 3rem !important; /* overrides Tailwind w-60 */
+  }
+  /* Hide labels when collapsed and not hovered */
+  #sidebar.auto-hide:not(:hover):not(:focus-within) .label {
+    display: inline-block;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity 140ms ease;
+  }
+  /* Center icons when labels hidden */
+  #sidebar.auto-hide:not(:hover):not(:focus-within) .btn {
+    justify-content: center;
+  }
+  /* Hide summary config when collapsed and not hovered */
+  #sidebar.auto-hide:not(:hover):not(:focus-within) #summaryConfig {
+    display: none;
+  }
+  #sidebar.auto-hide:hover .label,
+  #sidebar.auto-hide:focus-within .label {
+    opacity: 1;
+    width: auto;
+  }
+  /* Compact header spacing when collapsed */
+  #sidebar.auto-hide:not(:hover):not(:focus-within) .sidebar-header {
+    justify-content: center;
+  }
 }
